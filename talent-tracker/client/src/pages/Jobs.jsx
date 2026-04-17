@@ -97,9 +97,10 @@ export default function Jobs() {
     { field: 'openings', headerName: 'Openings', flex: 1, sortable: true },
     {
       headerName: 'Actions',
-      flex: 1,
+      width: 90,
       sortable: false,
       filter: false,
+      pinned: 'right',
       cellRenderer: ({ data }) => (
         <Space>
           <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(data)} />
@@ -127,15 +128,19 @@ export default function Jobs() {
 
       {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
 
-      <div className="ag-theme-quartz" style={{ height: 520, width: '100%' }}>
+      <style>{`.ag-paging-panel { height: 56px !important; font-size: 14px; }`}</style>
+      <div className="ag-theme-quartz" style={{ height: 'calc(100vh - 180px)', width: '100%' }}>
         <AgGridReact
           ref={gridRef}
           rowData={rows}
           columnDefs={columnDefs}
           loading={loading}
+          rowHeight={40}
+          headerHeight={45}
           pagination
-          paginationPageSize={10}
-          defaultColDef={{ resizable: true }}
+          paginationPageSize={20}
+          paginationPanelHeight={56}
+          defaultColDef={{ resizable: true, cellStyle: { display: 'flex', alignItems: 'center' }, suppressHeaderMenuButton: true, suppressHeaderFilterButton: true }}
         />
       </div>
 
