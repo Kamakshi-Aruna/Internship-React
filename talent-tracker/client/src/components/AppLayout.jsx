@@ -13,7 +13,7 @@ import {
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const { Sider, Header, Content } = Layout;
+const { Sider, Content } = Layout;
 const { Text } = Typography;
 
 const menuItems = [
@@ -87,17 +87,27 @@ export default function AppLayout() {
         theme="light"
         width={220}
       >
+        {/* Logo + collapse button */}
         <div style={{
           height: 64,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
+          padding: collapsed ? '0 12px' : '0 16px',
           borderBottom: `1px solid ${token.colorBorderSecondary}`,
           marginBottom: 8,
         }}>
-          <Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
-            {collapsed ? 'TT' : 'Talent Tracker'}
-          </Text>
+          {!collapsed && (
+            <Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
+              Talent Tracker
+            </Text>
+          )}
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={() => setCollapsed(!collapsed)}
+            style={{ fontSize: 16, marginLeft: collapsed ? 'auto' : 0 }}
+          />
         </div>
 
         <Menu
@@ -153,22 +163,6 @@ export default function AppLayout() {
       </Sider>
 
       <Layout>
-        <Header style={{
-          padding: '0 24px',
-          background: token.colorBgContainer,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: 16 }}
-          />
-        </Header>
-
         <Content style={{ margin: '24px', background: token.colorBgLayout }}>
           <Outlet />
         </Content>
