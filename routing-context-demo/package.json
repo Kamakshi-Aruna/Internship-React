@@ -1,0 +1,18 @@
+{
+  "name": "routing-context-demo",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^6.30.0",
+    "react-scripts": "5.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "browserslist": {
+    "development": ["last 1 chrome version"]
+  }
+}
