@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout, Menu, Avatar, Typography, Button, Dropdown, Divider, theme } from 'antd';
+import { Layout, Menu, Avatar, Typography, Button, Dropdown, Divider, Switch, theme } from 'antd';
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -7,6 +7,7 @@ import {
   LogoutOutlined,
   UserOutlined,
   MailOutlined,
+  BulbOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
@@ -22,7 +23,7 @@ const menuItems = [
   { key: '/jobs', icon: <SolutionOutlined />, label: 'Jobs' },
 ];
 
-export default function AppLayout() {
+export default function AppLayout({ isDark, setIsDark }) {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,6 +60,20 @@ export default function AppLayout() {
         </div>
       </div>
       <Divider style={{ margin: '8px 0' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', marginBottom: 4 }}>
+        <Text style={{ fontSize: 13 }}>
+          <BulbOutlined style={{ marginRight: 8 }} />
+          {isDark ? 'Dark Mode' : 'Light Mode'}
+        </Text>
+        <Switch
+          size="small"
+          checked={isDark}
+          onChange={setIsDark}
+          checkedChildren="🌙"
+          unCheckedChildren="☀️"
+        />
+      </div>
+      <Divider style={{ margin: '8px 0' }} />
       <Button
         type="text"
         danger
@@ -83,6 +98,7 @@ export default function AppLayout() {
           background: token.colorBgContainer,
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
         }}
         theme="light"
         width={220}
@@ -120,8 +136,13 @@ export default function AppLayout() {
 
         {/* User profile at bottom of sidebar */}
         <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           borderTop: `1px solid ${token.colorBorderSecondary}`,
           padding: '12px 16px',
+          background: token.colorBgContainer,
         }}>
           <Dropdown
             dropdownRender={userDropdownRender}
