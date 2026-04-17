@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Layout, Menu, Avatar, Typography, Button, Dropdown, theme } from 'antd';
+import { Layout, Menu, Avatar, Typography, Button, Dropdown, Divider, theme } from 'antd';
 import {
   DashboardOutlined,
   TeamOutlined,
   SolutionOutlined,
   LogoutOutlined,
   UserOutlined,
+  MailOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
@@ -33,15 +34,43 @@ export default function AppLayout() {
     navigate('/login');
   };
 
-  const userMenuItems = [
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
-      onClick: handleLogout,
-      danger: true,
-    },
-  ];
+  const userDropdownRender = () => (
+    <div style={{
+      background: token.colorBgContainer,
+      borderRadius: token.borderRadiusLG,
+      boxShadow: token.boxShadowSecondary,
+      padding: '12px 16px',
+      minWidth: 220,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <Avatar
+          size={48}
+          icon={<UserOutlined />}
+          style={{ backgroundColor: token.colorPrimary, flexShrink: 0 }}
+        />
+        <div>
+          <Text strong style={{ display: 'block' }}>
+            {user?.displayName || 'User'}
+          </Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            <MailOutlined style={{ marginRight: 4 }} />
+            {user?.email}
+          </Text>
+        </div>
+      </div>
+      <Divider style={{ margin: '8px 0' }} />
+      <Button
+        type="text"
+        danger
+        icon={<LogoutOutlined />}
+        onClick={handleLogout}
+        block
+        style={{ textAlign: 'left' }}
+      >
+        Logout
+      </Button>
+    </div>
+  );
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -50,7 +79,11 @@ export default function AppLayout() {
         collapsed={collapsed}
         onCollapse={setCollapsed}
         trigger={null}
-        style={{ background: token.colorBgContainer }}
+        style={{
+          background: token.colorBgContainer,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
         theme="light"
         width={220}
       >
@@ -62,22 +95,61 @@ export default function AppLayout() {
           borderBottom: `1px solid ${token.colorBorderSecondary}`,
           marginBottom: 8,
         }}>
-          {!collapsed && (
-            <Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
-              Talent Tracker
-            </Text>
-          )}
-          {collapsed && (
-            <Text strong style={{ fontSize: 18, color: token.colorPrimary }}>TT</Text>
-          )}
+          <Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
+            {collapsed ? 'TT' : 'Talent Tracker'}
+          </Text>
         </div>
+
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
-          style={{ border: 'none' }}
+          style={{ border: 'none', flex: 1 }}
         />
+
+        {/* User profile at bottom of sidebar */}
+        <div style={{
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+          padding: '12px 16px',
+        }}>
+          <Dropdown
+            dropdownRender={userDropdownRender}
+            placement="topRight"
+            trigger={['click']}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              cursor: 'pointer',
+              borderRadius: token.borderRadius,
+              padding: '6px 8px',
+              transition: 'background 0.2s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = token.colorFillAlter}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <Avatar
+                icon={<UserOutlined />}
+                style={{ backgroundColor: token.colorPrimary, flexShrink: 0 }}
+              />
+              {!collapsed && (
+                <div style={{ overflow: 'hidden' }}>
+                  <Text strong style={{ display: 'block', fontSize: 13, lineHeight: '18px' }}>
+                    {user?.displayName || 'User'}
+                  </Text>
+                  <Text
+                    type="secondary"
+                    style={{ fontSize: 11, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {user?.email}
+                  </Text>
+                </div>
+              )}
+            </div>
+          </Dropdown>
+        </div>
       </Sider>
 
       <Layout>
@@ -95,12 +167,6 @@ export default function AppLayout() {
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: 16 }}
           />
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-              <Avatar icon={<UserOutlined />} style={{ backgroundColor: token.colorPrimary }} />
-              <Text>{user?.email}</Text>
-            </div>
-          </Dropdown>
         </Header>
 
         <Content style={{ margin: '24px', background: token.colorBgLayout }}>
