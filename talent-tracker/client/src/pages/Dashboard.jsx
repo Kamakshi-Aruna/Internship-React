@@ -149,24 +149,6 @@ export default function Dashboard() {
           </Card>
         </Col>
       </Row>
-
-      {/* Recent Candidates */}
-      <Card title="Recent Candidates">
-        <List
-          dataSource={stats.recentCandidates || []}
-          renderItem={(c) => (
-            <List.Item>
-              <List.Item.Meta
-                avatar={<Avatar style={{ backgroundColor: '#1677ff' }}>{c.name?.[0]}</Avatar>}
-                title={c.name}
-                description={c.role || 'No role specified'}
-              />
-              <Tag color={STATUS_TAG_COLORS[c.status]}>{c.status}</Tag>
-            </List.Item>
-          )}
-          locale={{ emptyText: 'No candidates yet' }}
-        />
-      </Card>
     </div>
   );
 }
