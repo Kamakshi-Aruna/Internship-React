@@ -1,0 +1,176 @@
+# ============================================================
+# Kibana Dev Tools — Basic Elasticsearch Queries
+# Talent Tracker — Candidate Search
+#
+# HOW TO USE:
+#   1. Open http://localhost:5601
+#   2. Go to Menu → Management → Dev Tools
+#   3. Copy-paste any query below and press ▶ (play button)
+# ============================================================
+
+
+# ── 1. Check how many documents are indexed ──────────────────
+GET /candidates/_count
+
+
+# ── 2. See all candidates (first 10) ─────────────────────────
+GET /candidates/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+
+# ── 3. Full-text search by skill ─────────────────────────────
+# Finds candidates who have "React" in their skills
+# match is case-insensitive and does partial/fuzzy matching
+GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": "React"
+    }
+  }
+}
+
+
+# ── 4. Exact filter by location ──────────────────────────────
+# term is for keyword fields — must be an exact match
+GET /candidates/_search
+{
+  "query": {
+    "term": {
+      "location": "New York"
+    }
+  }
+}
+
+
+# ── 5. Range query — experience >= 3 years ───────────────────
+GET /candidates/_search
+{
+  "query": {
+    "range": {
+      "experience_years": {
+        "gte": 3
+      }
+    }
+  }
+}
+
+
+# ── 6. Range query — experience between 2 and 5 years ────────
+GET /candidates/_search
+{
+  "query": {
+    "range": {
+      "experience_years": {
+        "gte": 2,
+        "lte": 5
+      }
+    }
+  }
+}
+
+
+# ── 7. Bool query — combine search + filters ─────────────────
+# Find active candidates who know React AND have 2+ years experience
+# must  = required, affects relevance score
+# filter = required yes/no gate, does NOT affect score (faster)
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "skills": "React" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 2 } } }
+      ]
+    }
+  }
+}
+
+
+# ── 8. Search across multiple fields at once ─────────────────
+GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React New York",
+      "fields": ["skills", "location", "name"]
+    }
+  }
+}
+
+
+# ── 9. Aggregation — count candidates by location ────────────
+# Like GROUP BY location in SQL
+# "size": 0 means don't return documents, only aggregation result
+GET /candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_location": {
+      "terms": {
+        "field": "location"
+      }
+    }
+  }
+}
+
+
+# ── 10. Aggregation — average experience years ───────────────
+GET /candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "avg_experience": {
+      "avg": {
+        "field": "experience_years"
+      }
+    }
+  }
+}
+
+
+# ── 11. Aggregation — count by status (active vs inactive) ───
+GET /candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_status": {
+      "terms": {
+        "field": "status"
+      }
+    }
+  }
+}
+
+
+# ── 12. Sort results by experience (descending) ──────────────
+GET /candidates/_search
+{
+  "query": { "match_all": {} },
+  "sort": [
+    { "experience_years": { "order": "desc" } }
+  ]
+}
+
+
+# ── 13. Only return specific fields (like SQL SELECT) ─────────
+GET /candidates/_search
+{
+  "query": { "match_all": {} },
+  "_source": ["name", "location", "experience_years"]
+}
+
+
+# ── 14. Check the mapping of the index ───────────────────────
+GET /candidates/_mapping
+
+
+# ── 15. Delete and re-create index (WARNING: destroys all data) ──
+DELETE /candidates

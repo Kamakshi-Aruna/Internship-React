@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elasticsearch for Beginners — Talent Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header p { margin-top: 8px; font-size: 1rem; opacity: 0.8; }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    main { max-width: 960px; margin: 40px auto; padding: 0 24px 60px; }
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8edf5;
+    }
+
+    h3 { font-size: 1rem; font-weight: 600; color: #16213e; margin: 22px 0 10px; }
+    p { margin-bottom: 10px; }
+
+    pre {
+      background: #1e2a3a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 12px 0;
+      white-space: pre;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.85em;
+      background: #eef2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0f3460;
+    }
+
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #0f3460; color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; }
+    td { padding: 9px 14px; border-bottom: 1px solid #e8edf5; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8f9fc; }
+    td code { font-size: 0.82em; }
+
+    .steps { counter-reset: step; padding-left: 0; list-style: none; }
+    .steps li {
+      counter-increment: step;
+      padding: 14px 16px 14px 56px;
+      position: relative;
+      border-left: 3px solid #e8edf5;
+      margin-bottom: 10px;
+      border-radius: 0 8px 8px 0;
+      background: #f8f9fc;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      background: #0f3460;
+      color: #fff;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .tip {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .tip strong { color: #15803d; }
+
+    .warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .warning strong { color: #b45309; }
+
+    .analogy {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .analogy strong { color: #1d4ed8; }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .concept-card {
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+    }
+    .concept-card .icon { font-size: 2rem; margin-bottom: 8px; }
+    .concept-card h4 { font-size: 0.95rem; color: #0f3460; margin-bottom: 6px; }
+    .concept-card p { font-size: 0.82rem; color: #64748b; margin: 0; }
+
+    .phase-label {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .toc { list-style: none; padding-left: 0; }
+    .toc li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .toc a { color: #0f3460; text-decoration: none; font-size: 0.9rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .highlight-yellow { background: #fef9c3; padding: 2px 5px; border-radius: 3px; }
+    .highlight-green  { background: #dcfce7; padding: 2px 5px; border-radius: 3px; }
+    .highlight-blue   { background: #dbeafe; padding: 2px 5px; border-radius: 3px; }
+
+    .file-tree {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px 24px;
+      line-height: 1.8;
+      color: #334155;
+      overflow-x: auto;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Elasticsearch for Beginners</h1>
+  <p>Learn Elasticsearch concepts hands-on using the Talent Tracker project — indices, documents, mappings, Docker setup &amp; Kibana queries</p>
+  <div class="badge-row">
+    <span class="badge">Elasticsearch 8.x</span>
+    <span class="badge">Kibana Dev Tools</span>
+    <span class="badge">Docker</span>
+    <span class="badge">MongoDB → ES Indexing</span>
+    <span class="badge">Beginner Friendly</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───────────────────────────── TABLE OF CONTENTS ───────────────────────────── -->
+  <section id="toc">
+    <h2>Table of Contents</h2>
+    <ul class="toc">
+      <li><a href="#what-is-es">1. What is Elasticsearch? (The Simple Explanation)</a></li>
+      <li><a href="#core-concepts">2. Core Concepts — Index, Document, Mapping</a></li>
+      <li><a href="#mongo-vs-es">3. MongoDB vs Elasticsearch — Side-by-Side Comparison</a></li>
+      <li><a href="#docker-setup">4. Set Up Elasticsearch + Kibana with Docker</a></li>
+      <li><a href="#index-data">5. Index Candidate Data from MongoDB into Elasticsearch</a></li>
+      <li><a href="#kibana-queries">6. Run Basic Search Queries via Kibana Dev Tools</a></li>
+      <li><a href="#folder-structure">7. This Folder's File Structure</a></li>
+      <li><a href="#next-steps">8. Next Steps</a></li>
+    </ul>
+  </section>
+
+  <!-- ───────────────────────────── WHAT IS ES ───────────────────────────── -->
+  <section id="what-is-es">
+    <span class="phase-label">Concept</span>
+    <h2>1. What is Elasticsearch?</h2>
+
+    <p>
+      Elasticsearch is a <strong>search engine database</strong>. While MongoDB stores data and lets you filter it,
+      Elasticsearch stores data and lets you <strong>search it super fast</strong> — even across millions of records,
+      with full-text search, typo tolerance, ranking, and filters combined.
+    </p>
+
+    <div class="analogy">
+      <strong>Simple Analogy:</strong><br/>
+      MongoDB is like a <em>filing cabinet</em> — great for storing and retrieving exact records.<br/>
+      Elasticsearch is like <em>Google Search</em> — great for finding relevant results from a huge pile of data,
+      ranked by how well they match your query.
+    </div>
+
+    <h3>When do you use Elasticsearch in Talent Tracker?</h3>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">🔍</div>
+        <h4>Full-Text Search</h4>
+        <p>Search "React developer New York" and get best-match candidates</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⚡</div>
+        <h4>Fast Autocomplete</h4>
+        <p>Type "Java" and instantly see matching skills/candidates</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🎯</div>
+        <h4>Relevance Ranking</h4>
+        <p>Results sorted by how well a candidate matches the job</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📊</div>
+        <h4>Aggregations</h4>
+        <p>Count candidates by skill, location, or experience level</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── CORE CONCEPTS ───────────────────────────── -->
+  <section id="core-concepts">
+    <span class="phase-label">Core Concepts</span>
+    <h2>2. Core Concepts — Index, Document, Mapping</h2>
+
+    <h3>2.1 Index</h3>
+    <p>
+      An <strong>Index</strong> is like a <em>table in a database</em>, or a <em>collection in MongoDB</em>.
+      It holds a group of related documents. In our project we will have an index called <code>candidates</code>.
+    </p>
+    <div class="analogy">
+      <strong>Think of it this way:</strong> MongoDB Collection <code>candidates</code> → Elasticsearch Index <code>candidates</code>
+    </div>
+
+    <h3>2.2 Document</h3>
+    <p>
+      A <strong>Document</strong> is a single record inside an index — it is a JSON object.
+      Just like one candidate object in MongoDB is one document, one candidate in Elasticsearch is also one document.
+    </p>
+    <pre><code>{
+  "_id": "001",
+  "_source": {
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "skills": ["React", "Node.js", "MongoDB"],
+    "location": "New York",
+    "experience_years": 4,
+    "status": "active"
+  }
+}</code></pre>
+
+    <h3>2.3 Mapping</h3>
+    <p>
+      A <strong>Mapping</strong> is like a <em>schema</em> — it tells Elasticsearch what type each field is:
+      text, keyword, number, date, boolean, etc. This matters because:
+    </p>
+    <ul style="padding-left: 20px; margin-bottom: 12px;">
+      <li style="margin-bottom: 6px;"><code>text</code> fields are analyzed (broken into words) — used for full-text search</li>
+      <li style="margin-bottom: 6px;"><code>keyword</code> fields are stored as-is — used for exact match, sorting, filtering</li>
+      <li style="margin-bottom: 6px;"><code>integer</code> / <code>float</code> — used for numeric range queries</li>
+      <li style="margin-bottom: 6px;"><code>date</code> — used for date range queries</li>
+    </ul>
+
+    <div class="tip">
+      <strong>Tip:</strong> If you want to both search AND filter on a field (like <code>skills</code>),
+      use <code>multi-fields</code>: map it as both <code>text</code> (for search) and <code>keyword</code> (for exact filter/aggregation).
+    </div>
+
+    <h3>Example Mapping for the <code>candidates</code> index:</h3>
+    <pre><code>PUT /candidates
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "email":            { "type": "keyword" },
+      "skills": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "location":         { "type": "keyword" },
+      "experience_years": { "type": "integer" },
+      "status":           { "type": "keyword" },
+      "applied_at":       { "type": "date" }
+    }
+  }
+}</code></pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Why this type?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>text + keyword</td><td>Full-text search + exact sort</td></tr>
+          <tr><td><code>email</code></td><td>keyword</td><td>Always exact match, never full-text</td></tr>
+          <tr><td><code>skills</code></td><td>text + keyword</td><td>Search "react" loosely + filter exact "React"</td></tr>
+          <tr><td><code>location</code></td><td>keyword</td><td>Filter by exact city name</td></tr>
+          <tr><td><code>experience_years</code></td><td>integer</td><td>Range queries like &gt;= 3 years</td></tr>
+          <tr><td><code>status</code></td><td>keyword</td><td>Exact filter: active / inactive</td></tr>
+          <tr><td><code>applied_at</code></td><td>date</td><td>Sort and filter by date</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── MONGO VS ES ───────────────────────────── -->
+  <section id="mongo-vs-es">
+    <span class="phase-label">Comparison</span>
+    <h2>3. MongoDB vs Elasticsearch — Side-by-Side</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Concept</th><th>MongoDB</th><th>Elasticsearch</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Container of records</td><td>Collection</td><td>Index</td></tr>
+          <tr><td>Single record</td><td>Document (BSON)</td><td>Document (JSON)</td></tr>
+          <tr><td>Schema definition</td><td>Mongoose Schema / none</td><td>Mapping</td></tr>
+          <tr><td>Primary key</td><td><code>_id</code> (ObjectId)</td><td><code>_id</code> (string)</td></tr>
+          <tr><td>Query language</td><td>MQL (find, aggregate)</td><td>Query DSL (JSON over HTTP)</td></tr>
+          <tr><td>Best at</td><td>CRUD, flexible storage</td><td>Full-text search, ranking</td></tr>
+          <tr><td>Typical use</td><td>Source of truth</td><td>Search layer on top of MongoDB</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <strong>In Talent Tracker:</strong> MongoDB is the <strong>source of truth</strong>.
+      Elasticsearch is the <strong>search layer</strong>. When a candidate is saved in MongoDB,
+      we also index (copy) that data into Elasticsearch so searches are fast.
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── DOCKER SETUP ───────────────────────────── -->
+  <section id="docker-setup">
+    <span class="phase-label">Setup</span>
+    <h2>4. Set Up Elasticsearch + Kibana with Docker</h2>
+
+    <p>We use Docker so you don't need to install anything manually. Everything runs in containers.</p>
+
+    <h3>Step 1 — Prerequisites</h3>
+    <ul class="steps">
+      <li>Install <a href="https://www.docker.com/products/docker-desktop" target="_blank">Docker Desktop</a> and make sure it is running</li>
+      <li>Make sure you have at least <strong>4 GB RAM</strong> free (Elasticsearch is memory-hungry)</li>
+      <li>Open your terminal in this folder: <code>elasticsearch-concepts-demo/</code></li>
+    </ul>
+
+    <h3>Step 2 — Start with Docker Compose</h3>
+    <p>This folder has a <code>docker-compose.yml</code> that starts both Elasticsearch and Kibana together.</p>
+    <pre><code>cd elasticsearch-concepts-demo
+docker compose up -d</code></pre>
+
+    <p>Wait about 30 seconds, then check both services are running:</p>
+    <pre><code>docker compose ps</code></pre>
+
+    <div class="tip">
+      <strong>Expected output:</strong> Both <code>elasticsearch</code> and <code>kibana</code> services should show status <code>Up</code>.
+    </div>
+
+    <h3>Step 3 — Verify Elasticsearch is running</h3>
+    <pre><code># Open in your browser OR run this curl command:
+curl http://localhost:9200
+
+# You should see JSON like:
+{
+  "name": "...",
+  "cluster_name": "talent-tracker-cluster",
+  "version": { "number": "8.x.x", ... },
+  "tagline": "You Know, for Search"
+}</code></pre>
+
+    <h3>Step 4 — Open Kibana</h3>
+    <p>Kibana is a web UI for Elasticsearch. Open your browser and go to:</p>
+    <pre><code>http://localhost:5601</code></pre>
+
+    <div class="tip">
+      <strong>Kibana Dev Tools</strong> is what we use to run queries. Inside Kibana, go to:<br/>
+      <strong>Menu (hamburger icon) → Management → Dev Tools</strong>
+    </div>
+
+    <h3>To stop everything when you're done:</h3>
+    <pre><code>docker compose down</code></pre>
+
+    <div class="warning">
+      <strong>Note:</strong> Running <code>docker compose down -v</code> also deletes all indexed data.
+      Use plain <code>docker compose down</code> to keep your data between sessions.
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── INDEX DATA ───────────────────────────── -->
+  <section id="index-data">
+    <span class="phase-label">Data Indexing</span>
+    <h2>5. Index Candidate Data from MongoDB into Elasticsearch</h2>
+
+    <p>
+      We have a Node.js script (<code>scripts/index-candidates.js</code>) that:
+    </p>
+    <ol class="steps">
+      <li>Connects to your local MongoDB (where Talent Tracker data lives)</li>
+      <li>Reads all documents from the <code>candidates</code> collection</li>
+      <li>Creates the <code>candidates</code> index in Elasticsearch with the correct mapping</li>
+      <li>Sends all candidate documents to Elasticsearch (bulk indexing)</li>
+    </ol>
+
+    <h3>Install dependencies first:</h3>
+    <pre><code>cd elasticsearch-concepts-demo
+npm install</code></pre>
+
+    <h3>Run the indexing script:</h3>
+    <pre><code>node scripts/index-candidates.js</code></pre>
+
+    <h3>Expected output:</h3>
+    <pre><code>Connected to MongoDB
+Connected to Elasticsearch
+Creating index "candidates" with mapping...
+Index created successfully
+Fetched 5 candidates from MongoDB
+Indexed 5 documents into Elasticsearch
+Done!</code></pre>
+
+    <div class="tip">
+      <strong>How bulk indexing works:</strong> Instead of sending one document at a time,
+      the <code>bulk</code> API sends all documents in one HTTP request — much faster for large datasets.
+    </div>
+
+    <h3>What the script does internally (simplified):</h3>
+    <pre><code>// 1. Read from MongoDB
+const candidates = await Candidate.find({});
+
+// 2. Build bulk request body
+const body = candidates.flatMap(c => [
+  { index: { _index: "candidates", _id: c._id.toString() } },
+  {
+    name: c.name,
+    email: c.email,
+    skills: c.skills,
+    location: c.location,
+    experience_years: c.experience_years,
+    status: c.status
+  }
+]);
+
+// 3. Send to Elasticsearch
+await esClient.bulk({ body });</code></pre>
+  </section>
+
+  <!-- ───────────────────────────── KIBANA QUERIES ───────────────────────────── -->
+  <section id="kibana-queries">
+    <span class="phase-label">Querying</span>
+    <h2>6. Run Basic Search Queries via Kibana Dev Tools</h2>
+
+    <p>
+      Open Kibana at <code>http://localhost:5601</code>, go to <strong>Dev Tools</strong>,
+      and paste these queries one by one. Press the green play button (▶) to run each query.
+    </p>
+
+    <h3>Query 1 — Check how many documents are in the index</h3>
+    <pre><code>GET /candidates/_count</code></pre>
+
+    <h3>Query 2 — See all candidates (up to 10)</h3>
+    <pre><code>GET /candidates/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}</code></pre>
+
+    <h3>Query 3 — Full-text search by skill</h3>
+    <p>Find candidates who have "React" in their skills (case-insensitive, partial match):</p>
+    <pre><code>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": "React"
+    }
+  }
+}</code></pre>
+
+    <h3>Query 4 — Exact filter by location</h3>
+    <p>Find candidates who are in "New York" exactly:</p>
+    <pre><code>GET /candidates/_search
+{
+  "query": {
+    "term": {
+      "location": "New York"
+    }
+  }
+}</code></pre>
+
+    <h3>Query 5 — Range query on experience</h3>
+    <p>Find candidates with 3 or more years of experience:</p>
+    <pre><code>GET /candidates/_search
+{
+  "query": {
+    "range": {
+      "experience_years": {
+        "gte": 3
+      }
+    }
+  }
+}</code></pre>
+
+    <h3>Query 6 — Combine search + filter (bool query)</h3>
+    <p>Find active candidates who know React AND have 2+ years experience — this is the most common pattern:</p>
+    <pre><code>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "skills": "React" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 2 } } }
+      ]
+    }
+  }
+}</code></pre>
+
+    <div class="analogy">
+      <strong>bool query explained:</strong><br/>
+      <code>must</code> — affects relevance score (like WHERE clause that also ranks)<br/>
+      <code>filter</code> — yes/no gate, does NOT affect score (faster, cached)<br/>
+      <code>should</code> — optional boost (nice to have)<br/>
+      <code>must_not</code> — exclude results
+    </div>
+
+    <h3>Query 7 — Aggregation: count candidates by location</h3>
+    <p>Like <code>GROUP BY location</code> in SQL — how many candidates per city?</p>
+    <pre><code>GET /candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_location": {
+      "terms": {
+        "field": "location"
+      }
+    }
+  }
+}</code></pre>
+
+    <h3>Query 8 — Aggregation: average experience years</h3>
+    <pre><code>GET /candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "avg_experience": {
+      "avg": {
+        "field": "experience_years"
+      }
+    }
+  }
+}</code></pre>
+
+    <h3>Query 9 — Delete and re-create the index (reset)</h3>
+    <pre><code># Delete the index
+DELETE /candidates
+
+# Verify it's gone
+GET /candidates/_count</code></pre>
+
+    <div class="warning">
+      <strong>Warning:</strong> <code>DELETE /candidates</code> removes ALL indexed data. Only run this if you want to start fresh and re-run the indexing script.
+    </div>
+
+    <h3>Query Reference Table</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Query Type</th><th>Use When</th><th>Affects Score?</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>match_all</code></td><td>Fetch everything</td><td>No</td></tr>
+          <tr><td><code>match</code></td><td>Full-text search on text fields</td><td>Yes</td></tr>
+          <tr><td><code>term</code></td><td>Exact match on keyword fields</td><td>No (in filter)</td></tr>
+          <tr><td><code>terms</code></td><td>Exact match — one of several values</td><td>No (in filter)</td></tr>
+          <tr><td><code>range</code></td><td>Numbers / dates — greater/less than</td><td>No (in filter)</td></tr>
+          <tr><td><code>bool</code></td><td>Combine multiple queries</td><td>Depends on clause</td></tr>
+          <tr><td><code>multi_match</code></td><td>Search across multiple fields at once</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── FOLDER STRUCTURE ───────────────────────────── -->
+  <section id="folder-structure">
+    <span class="phase-label">Project Files</span>
+    <h2>7. This Folder's File Structure</h2>
+
+    <div class="file-tree">elasticsearch-concepts-demo/
+├── README.html                  ← This guide (open in browser)
+├── docker-compose.yml           ← Starts Elasticsearch + Kibana
+├── package.json                 ← Node.js dependencies
+├── scripts/
+│   ├── index-candidates.js      ← Reads MongoDB → indexes into ES
+│   └── sample-data.js           ← Creates sample candidates if MongoDB is empty
+└── kibana-queries/
+    └── basic-queries.txt        ← All queries from Section 6 in one file</div>
+
+    <h3>How to use these files:</h3>
+    <ul class="steps">
+      <li>Open <strong>README.html</strong> in your browser — this is your learning guide</li>
+      <li>Run <code>docker compose up -d</code> to start Elasticsearch and Kibana</li>
+      <li>Run <code>node scripts/index-candidates.js</code> to push data into Elasticsearch</li>
+      <li>Open Kibana Dev Tools and copy-paste queries from <code>kibana-queries/basic-queries.txt</code></li>
+    </ul>
+  </section>
+
+  <!-- ───────────────────────────── NEXT STEPS ───────────────────────────── -->
+  <section id="next-steps">
+    <span class="phase-label">Next Steps</span>
+    <h2>8. Next Steps — What to Learn After This</h2>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">⚡</div>
+        <h4>Autocomplete / Suggest</h4>
+        <p>Use <code>completion</code> field type + Suggest API for real-time search suggestions</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔗</div>
+        <h4>Sync with MongoDB</h4>
+        <p>Use Change Streams or Mongoose middleware to keep ES in sync when data changes</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🧠</div>
+        <h4>Relevance Tuning</h4>
+        <p>Use <code>boost</code>, function score, or custom analyzers to improve result quality</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📈</div>
+        <h4>Kibana Dashboards</h4>
+        <p>Build visual dashboards in Kibana — pie charts, bar graphs from your aggregation data</p>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top: 20px;">
+      <strong>Good job completing this module!</strong> You now understand what Elasticsearch is,
+      how its core concepts (index, document, mapping) map to things you already know from MongoDB,
+      how to run it locally with Docker, and how to search data with Kibana Dev Tools.
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

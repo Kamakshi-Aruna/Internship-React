@@ -1,0 +1,13 @@
+{
+  "name": "elasticsearch-concepts-demo",
+  "version": "1.0.0",
+  "description": "Beginner Elasticsearch demo — index MongoDB candidates into ES",
+  "scripts": {
+    "index": "node scripts/index-candidates.js",
+    "seed": "node scripts/sample-data.js"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.13.0",
+    "mongoose": "^8.3.0"
+  }
+}

@@ -536,6 +536,47 @@ FIREBASE_SERVICE_ACCOUNT=./serviceAccountKey.json</div>
     </div>
   </section>
 
+  <!-- Elasticsearch Learning Module -->
+  <section>
+    <h2>Bonus Learning Module — Elasticsearch</h2>
+    <p>
+      A separate beginner-friendly folder has been created to learn Elasticsearch concepts hands-on
+      using the Talent Tracker candidate data.
+    </p>
+
+    <h3>What you will learn</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Topic</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td>Core Concepts</td><td>Indices, Documents, Mappings — compared side-by-side with MongoDB</td></tr>
+          <tr><td>Docker Setup</td><td>Run Elasticsearch 8 + Kibana locally with one command</td></tr>
+          <tr><td>Data Indexing</td><td>Node.js script to bulk-index MongoDB candidates into Elasticsearch</td></tr>
+          <tr><td>Kibana Dev Tools</td><td>15 beginner queries — match, term, range, bool, aggregations</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>How to start</h3>
+    <ol class="steps">
+      <li>Open <code>elasticsearch-concepts-demo/README.html</code> in your browser — this is the full guide</li>
+      <li>Run <code>docker compose up -d</code> inside that folder to start Elasticsearch + Kibana</li>
+      <li>Run <code>node scripts/sample-data.js</code> to seed MongoDB with sample candidates</li>
+      <li>Run <code>node scripts/index-candidates.js</code> to push data into Elasticsearch</li>
+      <li>Open <code>http://localhost:5601</code> → Dev Tools → paste queries from <code>kibana-queries/basic-queries.txt</code></li>
+    </ol>
+
+    <div class="concepts" style="margin-top: 20px;">
+      <span class="concept-tag">Elasticsearch 8</span>
+      <span class="concept-tag">Kibana Dev Tools</span>
+      <span class="concept-tag">Docker Compose</span>
+      <span class="concept-tag">Index / Document / Mapping</span>
+      <span class="concept-tag">Bulk Indexing</span>
+      <span class="concept-tag">bool Query</span>
+      <span class="concept-tag">Aggregations</span>
+    </div>
+  </section>
+
 </main>
 
 </body>
