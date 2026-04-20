@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Final Project: Talent Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 24px 60px;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8edf5;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #16213e;
+      margin: 22px 0 10px;
+    }
+
+    p { margin-bottom: 10px; }
+
+    /* Tree */
+    .tree {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px 24px;
+      line-height: 1.7;
+      color: #334155;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #1e2a3a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 12px 0;
+      white-space: pre;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.85em;
+      background: #eef2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0f3460;
+    }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: #0f3460;
+      color: #fff;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #e8edf5;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #f8f9fc; }
+
+    td code { font-size: 0.82em; }
+
+    /* Phase steps */
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f4f8;
+    }
+
+    .steps li:last-child { border-bottom: none; }
+
+    .steps li::before {
+      content: counter(step);
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0f3460;
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Concept tags */
+    .concepts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .concept-tag {
+      background: #eef2ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    /* ENV section */
+    .env-block {
+      background: #fafafa;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #0f3460;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 10px 0;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.83rem;
+      line-height: 1.8;
+      color: #334155;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .env-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    /* Method badges */
+    .method {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .get    { background: #dcfce7; color: #166534; }
+    .post   { background: #dbeafe; color: #1e40af; }
+    .put    { background: #fef9c3; color: #854d0e; }
+    .delete { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Final Project: Talent Tracker</h1>
+  <p>React + Node.js + MongoDB + Firebase — Full-Stack Recruitment Management App</p>
+  <div class="badge-row">
+    <span class="badge">Firebase Auth</span>
+    <span class="badge">React (Vite)</span>
+    <span class="badge">Node.js / Express</span>
+    <span class="badge">MongoDB / Mongoose</span>
+    <span class="badge">Axios</span>
+    <span class="badge">Ant Design</span>
+    <span class="badge">AG Grid</span>
+    <span class="badge">Recharts</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Project Structure -->
+  <section>
+    <h2>Project Structure</h2>
+    <div class="tree">talent-tracker/
+├── client/                          # React frontend (Vite + React)
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── axiosInstance.js     # Axios instance + interceptors
+│   │   ├── components/
+│   │   │   ├── AppLayout.jsx        # Ant Design Sider + Header + Content
+│   │   │   ├── ProtectedRoute.jsx   # Redirect if not logged in
+│   │   │   └── LoadingSpinner.jsx   # Shared loading overlay
+│   │   ├── contexts/
+│   │   │   └── AuthContext.jsx      # Firebase auth state + provider
+│   │   ├── firebase/
+│   │   │   └── firebaseConfig.js    # Firebase app init
+│   │   ├── pages/
+│   │   │   ├── Login.jsx            # Email/password login form (antd)
+│   │   │   ├── Dashboard.jsx        # Recharts: bar + pie + stat cards
+│   │   │   ├── Candidates.jsx       # AG Grid table + add/edit modal
+│   │   │   └── Jobs.jsx             # AG Grid table + add/edit modal
+│   │   ├── App.jsx                  # Routes (React Router v6)
+│   │   └── main.jsx
+│   ├── .env                         # VITE_FIREBASE_*, VITE_API_URL
+│   └── package.json
+│
+└── server/                          # Node.js + Express backend
+    ├── config/db.js                 # Mongoose connect
+    ├── middleware/
+    │   ├── authMiddleware.js        # Verify Firebase ID token
+    │   └── errorHandler.js         # Centralized error responses
+    ├── models/
+    │   ├── Candidate.js             # Mongoose schema
+    │   └── Job.js                   # Mongoose schema
+    ├── routes/
+    │   ├── candidates.js            # CRUD /api/candidates
+    │   ├── jobs.js                  # CRUD /api/jobs
+    │   └── stats.js                 # GET /api/stats (for dashboard)
+    ├── .env                         # MONGO_URI, PORT, FIREBASE_PROJECT_ID
+    └── package.json</div>
+  </section>
+
+  <!-- Phase 1 -->
+  <section>
+    <h2>Phase 1 — Backend (Node.js + Express + MongoDB)</h2>
+
+    <h3>1.1 Setup</h3>
+    <pre>mkdir server && cd server
+npm init -y
+npm install express mongoose dotenv cors helmet morgan
+npm install firebase-admin
+npm install -D nodemon</pre>
+
+    <h3>1.2 Mongoose Models</h3>
+    <p><strong>Candidate</strong></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>String</td><td>required</td></tr>
+          <tr><td><code>email</code></td><td>String</td><td>required, unique</td></tr>
+          <tr><td><code>phone</code></td><td>String</td><td></td></tr>
+          <tr><td><code>status</code></td><td>String</td><td>enum: Applied, Interview, Hired, Rejected</td></tr>
+          <tr><td><code>role</code></td><td>String</td><td>job title applied for</td></tr>
+          <tr><td><code>createdAt</code></td><td>Date</td><td>default: now</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Job</strong></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>title</code></td><td>String</td><td>required</td></tr>
+          <tr><td><code>department</code></td><td>String</td><td></td></tr>
+          <tr><td><code>location</code></td><td>String</td><td></td></tr>
+          <tr><td><code>status</code></td><td>String</td><td>enum: Open, Closed, On Hold</td></tr>
+          <tr><td><code>openings</code></td><td>Number</td><td>default: 1</td></tr>
+          <tr><td><code>createdAt</code></td><td>Date</td><td>default: now</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1.3 REST API Endpoints</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Path</th><th>Description</th><th>Auth</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/stats</code></td><td>Dashboard summary counts</td><td>Yes</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/candidates</code></td><td>List all candidates</td><td>Yes</td></tr>
+          <tr><td><span class="method post">POST</span></td><td><code>/api/candidates</code></td><td>Create candidate</td><td>Yes</td></tr>
+          <tr><td><span class="method put">PUT</span></td><td><code>/api/candidates/:id</code></td><td>Update candidate</td><td>Yes</td></tr>
+          <tr><td><span class="method delete">DELETE</span></td><td><code>/api/candidates/:id</code></td><td>Delete candidate</td><td>Yes</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/jobs</code></td><td>List all jobs</td><td>Yes</td></tr>
+          <tr><td><span class="method post">POST</span></td><td><code>/api/jobs</code></td><td>Create job</td><td>Yes</td></tr>
+          <tr><td><span class="method put">PUT</span></td><td><code>/api/jobs/:id</code></td><td>Update job</td><td>Yes</td></tr>
+          <tr><td><span class="method delete">DELETE</span></td><td><code>/api/jobs/:id</code></td><td>Delete job</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1.4 Auth Middleware</h3>
+    <p>Client sends Firebase <code>idToken</code> in <code>Authorization: Bearer &lt;token&gt;</code> header. Server uses <code>firebase-admin</code> to verify the token on every protected route and attaches <code>req.user</code> (uid, email) for downstream use.</p>
+
+    <h3>1.5 Stats Endpoint Response Shape</h3>
+    <pre>{
+  "totalCandidates": 42,
+  "totalJobs": 8,
+  "byStatus": {
+    "Applied": 15, "Interview": 12, "Hired": 10, "Rejected": 5
+  },
+  "jobsByStatus": {
+    "Open": 5, "Closed": 2, "On Hold": 1
+  },
+  "recentCandidates": [ ...last 5 ]
+}</pre>
+  </section>
+
+  <!-- Phase 2 -->
+  <section>
+    <h2>Phase 2 — Firebase Setup</h2>
+    <ol class="steps">
+      <li>Create project at <strong>console.firebase.google.com</strong></li>
+      <li>Enable <strong>Email/Password</strong> Authentication</li>
+      <li>Add a Web App → copy config to <code>client/src/firebase/firebaseConfig.js</code></li>
+      <li>Download <strong>Service Account JSON</strong> → used in <code>server/</code> for firebase-admin</li>
+      <li>Add test user (email + password) in Firebase Console → Authentication → Users</li>
+    </ol>
+  </section>
+
+  <!-- Phase 3 -->
+  <section>
+    <h2>Phase 3 — Frontend (React + Vite)</h2>
+
+    <h3>3.1 Setup</h3>
+    <pre>npm create vite@latest client -- --template react
+cd client
+npm install axios react-router-dom firebase
+npm install antd @ant-design/icons
+npm install ag-grid-react ag-grid-community
+npm install recharts</pre>
+
+    <h3>3.2 Axios Instance with Interceptors</h3>
+    <p><code>src/api/axiosInstance.js</code></p>
+    <pre>const instance = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+
+// Request interceptor — attach Firebase token to every request
+instance.interceptors.request.use(async (config) => {
+  const token = await auth.currentUser?.getIdToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// Response interceptor — handle 401, normalize errors
+instance.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401) { /* redirect to /login */ }
+    return Promise.reject(error);
+  }
+);</pre>
+
+    <h3>3.3 AuthContext</h3>
+    <p><code>src/contexts/AuthContext.jsx</code> — wraps <code>onAuthStateChanged</code> from Firebase. Exposes: <code>user</code>, <code>loading</code>, <code>login(email, pass)</code>, <code>logout()</code>. <code>ProtectedRoute</code> reads from this context.</p>
+
+    <h3>3.4 Pages</h3>
+    <p><strong>Login.jsx</strong> — Ant Design <code>Form</code>, <code>Input</code>, <code>Button</code>. Calls <code>login()</code> from AuthContext. Shows <code>Alert</code> on error, <code>Spin</code> on loading.</p>
+    <p><strong>Dashboard.jsx</strong> — Fetches <code>/api/stats</code> on mount. Stat cards (<code>antd Statistic</code>): Total Candidates, Total Jobs, Hired, Open Jobs. Bar chart (<code>BarChart</code>): Candidates by status. Pie chart (<code>PieChart</code>): Jobs by status.</p>
+    <p><strong>Candidates.jsx</strong> — Fetches <code>/api/candidates</code> on mount. AG Grid table: name, email, phone, status, role, actions. Add/Edit Modal (antd <code>Modal</code> + <code>Form</code>). Delete with antd <code>Popconfirm</code>.</p>
+    <p><strong>Jobs.jsx</strong> — Same pattern as Candidates. Fields: title, department, location, status, openings.</p>
+
+    <h3>3.5 AppLayout (Sidebar)</h3>
+    <p>Ant Design <code>Layout</code> with <code>Sider</code>, <code>Header</code>, <code>Content</code>. Menu items: Dashboard, Candidates, Jobs. User avatar + logout button in Header. Collapsible sidebar.</p>
+
+    <h3>3.6 Loading &amp; Error Pattern (used in every page)</h3>
+    <pre>const [data, setData] = useState([]);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+
+useEffect(() => {
+  setLoading(true);
+  axiosInstance.get('/api/candidates')
+    .then(res => setData(res.data))
+    .catch(err => setError(err.response?.data?.message || 'Failed to load'))
+    .finally(() => setLoading(false));
+}, []);
+
+if (loading) return &lt;Spin /&gt;;
+if (error) return &lt;Alert type="error" message={error} /&gt;;</pre>
+  </section>
+
+  <!-- Phase 4 -->
+  <section>
+    <h2>Phase 4 — Wiring It Together</h2>
+
+    <h3>4.1 React Router Setup (App.jsx)</h3>
+    <pre>/login          →  Login.jsx          (public)
+/               →  AppLayout          (protected)
+  /dashboard    →  Dashboard.jsx
+  /candidates   →  Candidates.jsx
+  /jobs         →  Jobs.jsx</pre>
+
+    <h3>4.2 Environment Variables</h3>
+    <p class="env-label">client/.env</p>
+    <div class="env-block">VITE_API_URL=http://localhost:5000
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_APP_ID=...</div>
+
+    <p class="env-label" style="margin-top:14px">server/.env</p>
+    <div class="env-block">PORT=5000
+MONGO_URI=mongodb://localhost:27017/talent-tracker
+FIREBASE_SERVICE_ACCOUNT=./serviceAccountKey.json</div>
+  </section>
+
+  <!-- Phase 5 -->
+  <section>
+    <h2>Phase 5 — Build Order (Step by Step)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>What to Build</th><th>Key Files</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Server scaffold + MongoDB connect</td><td><code>server/config/db.js</code>, <code>server/index.js</code></td></tr>
+          <tr><td>2</td><td>Mongoose models</td><td><code>server/models/Candidate.js</code>, <code>Job.js</code></td></tr>
+          <tr><td>3</td><td>Auth middleware (firebase-admin)</td><td><code>server/middleware/authMiddleware.js</code></td></tr>
+          <tr><td>4</td><td>CRUD routes for candidates + jobs + stats</td><td><code>server/routes/*.js</code></td></tr>
+          <tr><td>5</td><td>Firebase project + client config</td><td><code>client/src/firebase/firebaseConfig.js</code></td></tr>
+          <tr><td>6</td><td>AuthContext + ProtectedRoute</td><td><code>client/src/contexts/AuthContext.jsx</code></td></tr>
+          <tr><td>7</td><td>Axios instance with interceptors</td><td><code>client/src/api/axiosInstance.js</code></td></tr>
+          <tr><td>8</td><td>Login page</td><td><code>client/src/pages/Login.jsx</code></td></tr>
+          <tr><td>9</td><td>AppLayout sidebar</td><td><code>client/src/components/AppLayout.jsx</code></td></tr>
+          <tr><td>10</td><td>Dashboard page + Recharts</td><td><code>client/src/pages/Dashboard.jsx</code></td></tr>
+          <tr><td>11</td><td>Candidates page + AG Grid + Modal</td><td><code>client/src/pages/Candidates.jsx</code></td></tr>
+          <tr><td>12</td><td>Jobs page + AG Grid + Modal</td><td><code>client/src/pages/Jobs.jsx</code></td></tr>
+          <tr><td>13</td><td>Wire routes in App.jsx</td><td><code>client/src/App.jsx</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Key Concepts -->
+  <section>
+    <h2>Key Concepts Demonstrated</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Concept</th><th>Where Used</th></tr></thead>
+        <tbody>
+          <tr><td>Components + Props</td><td>AppLayout, StatCard, LoadingSpinner</td></tr>
+          <tr><td>useState / useEffect</td><td>Every page for data fetching</td></tr>
+          <tr><td>useContext</td><td>AuthContext consumed in every protected page</td></tr>
+          <tr><td>React Router v6</td><td>Nested routes, ProtectedRoute, useNavigate</td></tr>
+          <tr><td>Axios interceptors</td><td>axiosInstance.js — auto-attach token, handle 401</td></tr>
+          <tr><td>Loading states + errors</td><td>Every page — Spin, Alert, disabled buttons</td></tr>
+          <tr><td>Firebase Auth</td><td>Login, AuthContext, token in Axios request interceptor</td></tr>
+          <tr><td>Node.js Express API</td><td>server/routes — CRUD endpoints</td></tr>
+          <tr><td>MongoDB + Mongoose</td><td>server/models — schema, validation, queries</td></tr>
+          <tr><td>Ant Design</td><td>Layout, Form, Modal, Table, Button, Statistic</td></tr>
+          <tr><td>AG Grid</td><td>Candidates + Jobs tables with sorting/filtering</td></tr>
+          <tr><td>Recharts</td><td>Dashboard bar chart + pie chart</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="concepts" style="margin-top: 20px;">
+      <span class="concept-tag">Components + Props</span>
+      <span class="concept-tag">useState / useEffect</span>
+      <span class="concept-tag">useContext</span>
+      <span class="concept-tag">React Router v6</span>
+      <span class="concept-tag">Axios interceptors</span>
+      <span class="concept-tag">Loading states</span>
+      <span class="concept-tag">Firebase Auth</span>
+      <span class="concept-tag">Express REST API</span>
+      <span class="concept-tag">MongoDB + Mongoose</span>
+      <span class="concept-tag">Ant Design</span>
+      <span class="concept-tag">AG Grid</span>
+      <span class="concept-tag">Recharts</span>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
