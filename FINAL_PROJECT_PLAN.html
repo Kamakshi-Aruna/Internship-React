@@ -577,6 +577,47 @@ FIREBASE_SERVICE_ACCOUNT=./serviceAccountKey.json</div>
     </div>
   </section>
 
+  <!-- Elasticsearch Advanced Queries Module -->
+  <section>
+    <h2>Bonus Learning Module — Elasticsearch Advanced Queries</h2>
+    <p>
+      A second folder covers advanced Elasticsearch querying patterns used in real search features —
+      all explained with Talent Tracker candidate data.
+    </p>
+
+    <h3>What you will learn</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Topic</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td>match &amp; multi_match</td><td>Full-text search on one or many fields, field boosting, fuzziness</td></tr>
+          <tr><td>bool query</td><td>must / filter / should / must_not — combine any conditions</td></tr>
+          <tr><td>term / range / exists filters</td><td>Exact match, numeric ranges, check if field has a value</td></tr>
+          <tr><td>highlight</td><td>Return snippets with matched words wrapped in tags</td></tr>
+          <tr><td>Combined queries</td><td>Production-level search: full-text + filters + highlight + sort</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>How to start</h3>
+    <ol class="steps">
+      <li>Open <code>elasticsearch-advanced-queries-demo/README.html</code> in your browser</li>
+      <li>Open Kibana Dev Tools → Console</li>
+      <li>Copy queries from <code>kibana-queries/advanced-queries.txt</code> and run them one by one</li>
+    </ol>
+
+    <div class="concepts" style="margin-top: 20px;">
+      <span class="concept-tag">match / multi_match</span>
+      <span class="concept-tag">bool query</span>
+      <span class="concept-tag">term / terms filter</span>
+      <span class="concept-tag">range filter</span>
+      <span class="concept-tag">exists filter</span>
+      <span class="concept-tag">highlight</span>
+      <span class="concept-tag">field boosting ^</span>
+      <span class="concept-tag">fuzziness</span>
+    </div>
+  </section>
+
 </main>
 
 </body>

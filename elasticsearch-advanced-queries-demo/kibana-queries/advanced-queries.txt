@@ -1,0 +1,394 @@
+# ============================================================
+# Kibana Dev Tools — Advanced Elasticsearch Queries
+# Talent Tracker — Candidate Search
+#
+# HOW TO USE:
+#   Open http://localhost:5601 → Dev Tools → Console
+#   Copy-paste any query and press ▶
+# ============================================================
+
+
+# ── SETUP — Run these first ───────────────────────────────────
+
+DELETE /candidates
+
+PUT /candidates
+{
+  "mappings": {
+    "properties": {
+      "name":             { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "email":            { "type": "keyword" },
+      "skills":           { "type": "text",  "fields": { "keyword": { "type": "keyword" } } },
+      "location":         { "type": "keyword" },
+      "experience_years": { "type": "integer" },
+      "status":           { "type": "keyword" },
+      "bio":              { "type": "text" }
+    }
+  }
+}
+
+POST /candidates/_bulk
+{ "index": { "_id": "1" } }
+{ "name": "Alice Johnson", "email": "alice@example.com", "skills": ["React", "Node.js", "MongoDB"], "location": "New York", "experience_years": 4, "status": "active", "bio": "Alice is an experienced React developer who loves building fast user interfaces." }
+{ "index": { "_id": "2" } }
+{ "name": "Bob Smith", "email": "bob@example.com", "skills": ["Java", "Spring Boot", "PostgreSQL"], "location": "San Francisco", "experience_years": 6, "status": "active", "bio": "Bob is a backend Java engineer with deep experience in enterprise systems." }
+{ "index": { "_id": "3" } }
+{ "name": "Carol Williams", "email": "carol@example.com", "skills": ["Python", "Django", "React"], "location": "New York", "experience_years": 3, "status": "active", "bio": "Carol builds full-stack applications using Python and React." }
+{ "index": { "_id": "4" } }
+{ "name": "David Lee", "email": "david@example.com", "skills": ["React", "TypeScript", "GraphQL"], "location": "Austin", "experience_years": 2, "status": "inactive", "bio": "David is a frontend developer specializing in React and TypeScript." }
+{ "index": { "_id": "5" } }
+{ "name": "Eva Martinez", "email": "eva@example.com", "skills": ["Vue.js", "Node.js", "MySQL"], "location": "San Francisco", "experience_years": 5, "status": "active", "bio": "Eva is a full-stack developer experienced with Vue.js and Node.js backends." }
+{ "index": { "_id": "6" } }
+{ "name": "Frank Chen", "email": "frank@example.com", "skills": ["React", "Python", "AWS"], "location": "New York", "experience_years": 7, "status": "active", "bio": "Frank is a senior engineer who works across React frontends and Python microservices on AWS." }
+
+
+# ════════════════════════════════════════════════════════════
+# TOPIC 1 — match Query
+# ════════════════════════════════════════════════════════════
+
+# 1a. Basic match — find React candidates
+GET /candidates/_search
+{
+  "query": {
+    "match": { "skills": "React" }
+  }
+}
+
+# 1b. match with OR (default) — React OR Python
+GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": "React Python"
+    }
+  }
+}
+
+# 1c. match with AND — must have BOTH React AND Python
+GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": {
+        "query": "React Python",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+# 1d. match with fuzziness — typo "Raect" still finds "React"
+GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": {
+        "query": "Raect",
+        "fuzziness": "AUTO"
+      }
+    }
+  }
+}
+
+
+# ════════════════════════════════════════════════════════════
+# TOPIC 2 — multi_match Query
+# ════════════════════════════════════════════════════════════
+
+# 2a. Search "React" across skills AND bio
+GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React developer",
+      "fields": ["skills", "bio", "name"]
+    }
+  }
+}
+
+# 2b. Boost skills field — match in skills ranks higher than bio
+GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React",
+      "fields": ["skills^3", "bio^1", "name^2"]
+    }
+  }
+}
+
+# 2c. cross_fields type — useful when search terms may span fields
+GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React New York",
+      "fields": ["skills", "location", "bio"],
+      "type": "best_fields"
+    }
+  }
+}
+
+
+# ════════════════════════════════════════════════════════════
+# TOPIC 3 — bool Query
+# ════════════════════════════════════════════════════════════
+
+# 3a. must + filter — active React candidates with 3+ years
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "skills": "React" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 3 } } }
+      ]
+    }
+  }
+}
+
+# 3b. should — all active candidates, but New York ranks higher
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "status": "active" } }
+      ],
+      "should": [
+        { "term": { "location": "New York" } }
+      ]
+    }
+  }
+}
+
+# 3c. must_not — exclude inactive candidates
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        { "term": { "status": "inactive" } }
+      ]
+    }
+  }
+}
+
+# 3d. All four clauses together
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "bio": "developer" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 2 } } }
+      ],
+      "should": [
+        { "term":  { "location": "New York" } },
+        { "match": { "skills": "React" } }
+      ],
+      "must_not": [
+        { "term": { "location": "Austin" } }
+      ]
+    }
+  }
+}
+
+
+# ════════════════════════════════════════════════════════════
+# TOPIC 4 — Filters: term, range, exists
+# ════════════════════════════════════════════════════════════
+
+# 4a. term — exact match on keyword field
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "status": "active" } }
+      ]
+    }
+  }
+}
+
+# 4b. terms — match any value in a list (like SQL IN)
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "location": ["New York", "Austin"] } }
+      ]
+    }
+  }
+}
+
+# 4c. range — experience between 3 and 6 years
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "range": { "experience_years": { "gte": 3, "lte": 6 } } }
+      ]
+    }
+  }
+}
+
+# 4d. exists — candidates who HAVE a bio field
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "exists": { "field": "bio" } }
+      ]
+    }
+  }
+}
+
+# 4e. must_not + exists — candidates who do NOT have a bio
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        { "exists": { "field": "bio" } }
+      ]
+    }
+  }
+}
+
+
+# ════════════════════════════════════════════════════════════
+# TOPIC 5 — Highlight
+# ════════════════════════════════════════════════════════════
+
+# 5a. Basic highlight on bio
+GET /candidates/_search
+{
+  "query": {
+    "match": { "bio": "React developer" }
+  },
+  "highlight": {
+    "fields": {
+      "bio": {}
+    }
+  }
+}
+
+# 5b. Custom tags — use <strong> instead of <em>
+GET /candidates/_search
+{
+  "query": {
+    "match": { "bio": "React" }
+  },
+  "highlight": {
+    "pre_tags":  ["<strong>"],
+    "post_tags": ["</strong>"],
+    "fields": {
+      "bio": {}
+    }
+  }
+}
+
+# 5c. Highlight multiple fields
+GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React developer",
+      "fields": ["bio", "skills"]
+    }
+  },
+  "highlight": {
+    "fields": {
+      "bio":    {},
+      "skills": {}
+    }
+  }
+}
+
+# 5d. Control snippet size
+GET /candidates/_search
+{
+  "query": {
+    "match": { "bio": "React" }
+  },
+  "highlight": {
+    "fields": {
+      "bio": {
+        "fragment_size": 80,
+        "number_of_fragments": 2
+      }
+    }
+  }
+}
+
+
+# ════════════════════════════════════════════════════════════
+# TOPIC 6 — Combined: Full-Text + Filters + Highlight
+# ════════════════════════════════════════════════════════════
+
+# 6a. Full production-level search query
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "React developer",
+            "fields": ["skills^3", "bio^1"],
+            "type": "best_fields"
+          }
+        }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "term":  { "location": "New York" } },
+        { "range": { "experience_years": { "gte": 3 } } },
+        { "exists": { "field": "bio" } }
+      ]
+    }
+  },
+  "highlight": {
+    "fields": {
+      "bio":    { "fragment_size": 100 },
+      "skills": {}
+    }
+  },
+  "sort": [
+    { "_score":           { "order": "desc" } },
+    { "experience_years": { "order": "desc" } }
+  ],
+  "_source": ["name", "email", "skills", "location", "experience_years", "status"]
+}
+
+# 6b. Search bar + sidebar filters (typical talent search page)
+GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "skills": "Python" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 2, "lte": 8 } } }
+      ],
+      "should": [
+        { "term": { "location": "New York" } }
+      ]
+    }
+  },
+  "highlight": {
+    "fields": { "skills": {}, "bio": {} }
+  }
+}

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elasticsearch Advanced Queries — Talent Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header p  { margin-top: 8px; font-size: 1rem; opacity: 0.8; }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    main { max-width: 980px; margin: 40px auto; padding: 0 24px 60px; }
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8edf5;
+    }
+    h3 { font-size: 1rem; font-weight: 600; color: #16213e; margin: 24px 0 10px; }
+    p  { margin-bottom: 10px; }
+
+    pre {
+      background: #1e2a3a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      margin: 12px 0;
+      white-space: pre;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.85em;
+      background: #eef2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0f3460;
+    }
+
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #0f3460; color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; }
+    td { padding: 9px 14px; border-bottom: 1px solid #e8edf5; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8f9fc; }
+    td code { font-size: 0.82em; }
+
+    .tip {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .tip strong { color: #15803d; }
+
+    .warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .warning strong { color: #b45309; }
+
+    .analogy {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .analogy strong { color: #1d4ed8; }
+
+    .result-box {
+      background: #0f2027;
+      color: #a8ff78;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin: 10px 0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .phase-label {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .topic-label {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      padding: 3px 10px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .label-blue   { background: #dbeafe; color: #1e40af; }
+    .label-purple { background: #ede9fe; color: #5b21b6; }
+    .label-green  { background: #dcfce7; color: #15803d; }
+    .label-orange { background: #ffedd5; color: #9a3412; }
+
+    .toc { list-style: none; padding-left: 0; }
+    .toc li { padding: 7px 0; border-bottom: 1px solid #f0f0f0; }
+    .toc a  { color: #0f3460; text-decoration: none; font-size: 0.9rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .query-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+    .query-card-header {
+      background: #f8f9fc;
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #0f3460;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .query-card-body { padding: 18px; }
+    .query-card-body pre { margin: 0; }
+
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 14px 0;
+    }
+    .diff-box {
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 0.85rem;
+    }
+    .diff-box h4 { margin-bottom: 8px; font-size: 0.9rem; }
+    .diff-no  { background: #fef2f2; border: 1px solid #fecaca; }
+    .diff-yes { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .diff-no  h4 { color: #991b1b; }
+    .diff-yes h4 { color: #15803d; }
+
+    .steps { counter-reset: step; padding-left: 0; list-style: none; }
+    .steps li {
+      counter-increment: step;
+      padding: 12px 16px 12px 52px;
+      position: relative;
+      border-left: 3px solid #e8edf5;
+      margin-bottom: 8px;
+      border-radius: 0 8px 8px 0;
+      background: #f8f9fc;
+      font-size: 0.9rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 12px; top: 12px;
+      background: #0f3460;
+      color: #fff;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .highlight-keyword { color: #f7c948; }
+    .highlight-value   { color: #a8ff78; }
+    .highlight-comment { color: #6b8096; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Elasticsearch Advanced Queries</h1>
+  <p>match · multi_match · bool · term · range · exists · highlight · combined search — all explained for beginners using Talent Tracker candidate data</p>
+  <div class="badge-row">
+    <span class="badge">match &amp; multi_match</span>
+    <span class="badge">bool query</span>
+    <span class="badge">term / range / exists filters</span>
+    <span class="badge">highlight</span>
+    <span class="badge">combined queries</span>
+    <span class="badge">Kibana Dev Tools</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── TABLE OF CONTENTS ── -->
+  <section>
+    <h2>Table of Contents</h2>
+    <ul class="toc">
+      <li><a href="#setup">0. Quick Setup — Paste Sample Data First</a></li>
+      <li><a href="#match">1. match Query — Full-Text Search on One Field</a></li>
+      <li><a href="#multimatch">2. multi_match Query — Search Across Multiple Fields</a></li>
+      <li><a href="#bool">3. bool Query — Combine Multiple Conditions</a></li>
+      <li><a href="#filters">4. Filters — term, range, exists</a></li>
+      <li><a href="#highlight">5. Highlight — Show Matched Terms in Results</a></li>
+      <li><a href="#combined">6. Combined — Full-Text Search + Structured Filters</a></li>
+      <li><a href="#cheatsheet">7. Quick Reference Cheat Sheet</a></li>
+    </ul>
+  </section>
+
+  <!-- ── SETUP ── -->
+  <section id="setup">
+    <span class="phase-label">Setup</span>
+    <h2>0. Quick Setup — Paste Sample Data First</h2>
+    <p>If you haven't already indexed the candidate data, run these two queries in Kibana Dev Tools Console one by one.</p>
+
+    <h3>Create the index with mapping:</h3>
+    <pre>PUT /candidates
+{
+  "mappings": {
+    "properties": {
+      "name":             { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "email":            { "type": "keyword" },
+      "skills":           { "type": "text",  "fields": { "keyword": { "type": "keyword" } } },
+      "location":         { "type": "keyword" },
+      "experience_years": { "type": "integer" },
+      "status":           { "type": "keyword" },
+      "bio":              { "type": "text" }
+    }
+  }
+}</pre>
+
+    <h3>Bulk insert 6 candidates (includes bio field for highlight demo):</h3>
+    <pre>POST /candidates/_bulk
+{ "index": { "_id": "1" } }
+{ "name": "Alice Johnson", "email": "alice@example.com", "skills": ["React", "Node.js", "MongoDB"], "location": "New York", "experience_years": 4, "status": "active", "bio": "Alice is an experienced React developer who loves building fast user interfaces." }
+{ "index": { "_id": "2" } }
+{ "name": "Bob Smith", "email": "bob@example.com", "skills": ["Java", "Spring Boot", "PostgreSQL"], "location": "San Francisco", "experience_years": 6, "status": "active", "bio": "Bob is a backend Java engineer with deep experience in enterprise systems." }
+{ "index": { "_id": "3" } }
+{ "name": "Carol Williams", "email": "carol@example.com", "skills": ["Python", "Django", "React"], "location": "New York", "experience_years": 3, "status": "active", "bio": "Carol builds full-stack applications using Python and React." }
+{ "index": { "_id": "4" } }
+{ "name": "David Lee", "email": "david@example.com", "skills": ["React", "TypeScript", "GraphQL"], "location": "Austin", "experience_years": 2, "status": "inactive", "bio": "David is a frontend developer specializing in React and TypeScript." }
+{ "index": { "_id": "5" } }
+{ "name": "Eva Martinez", "email": "eva@example.com", "skills": ["Vue.js", "Node.js", "MySQL"], "location": "San Francisco", "experience_years": 5, "status": "active", "bio": "Eva is a full-stack developer experienced with Vue.js and Node.js backends." }
+{ "index": { "_id": "6" } }
+{ "name": "Frank Chen", "email": "frank@example.com", "skills": ["React", "Python", "AWS"], "location": "New York", "experience_years": 7, "status": "active", "bio": "Frank is a senior engineer who works across React frontends and Python microservices on AWS." }</pre>
+
+    <div class="tip">
+      <strong>Already have candidates from the basics module?</strong> Run <code>DELETE /candidates</code> first, then re-create with the mapping above — it now includes the <code>bio</code> field needed for the highlight demo.
+    </div>
+  </section>
+
+  <!-- ── MATCH ── -->
+  <section id="match">
+    <span class="topic-label label-blue">Topic 1</span>
+    <h2>1. match Query — Full-Text Search on One Field</h2>
+
+    <p>
+      <code>match</code> is the standard query for full-text search. It <strong>analyzes</strong> your search text
+      (lowercases it, splits into words) and finds documents that contain those words.
+    </p>
+
+    <div class="analogy">
+      <strong>Think of it like:</strong> Google search — you type "react developer" and it finds all pages that mention "react" or "developer", ranked by relevance.
+    </div>
+
+    <h3>Basic match — find candidates who know React:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": "React"
+    }
+  }
+}</pre>
+    <div class="tip"><strong>Returns:</strong> Alice, Carol, David, Frank — all have React in skills</div>
+
+    <h3>match with multiple words — OR behavior by default:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": "React Python"
+    }
+  }
+}</pre>
+    <div class="tip"><strong>Returns:</strong> Anyone with React OR Python — Alice, Carol, David, Frank, and Carol/Frank who have Python too. Documents with BOTH score higher.</div>
+
+    <h3>match with AND operator — must contain ALL words:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": {
+        "query": "React Python",
+        "operator": "and"
+      }
+    }
+  }
+}</pre>
+    <div class="tip"><strong>Returns:</strong> Only Carol and Frank — they have BOTH React AND Python</div>
+
+    <h3>match on bio field — search inside text:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "bio": "full-stack developer"
+    }
+  }
+}</pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>operator: "or"</code></td><td>Yes</td><td>Match any word — more results</td></tr>
+          <tr><td><code>operator: "and"</code></td><td>No</td><td>Match all words — stricter results</td></tr>
+          <tr><td><code>fuzziness: "AUTO"</code></td><td>No</td><td>Allow typos — "Raect" still finds "React"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Bonus — match with fuzziness (typo tolerance):</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "skills": {
+        "query": "Raect",
+        "fuzziness": "AUTO"
+      }
+    }
+  }
+}</pre>
+    <div class="tip"><strong>"Raect" still finds "React"</strong> — useful for search boxes where users make typos</div>
+  </section>
+
+  <!-- ── MULTI_MATCH ── -->
+  <section id="multimatch">
+    <span class="topic-label label-purple">Topic 2</span>
+    <h2>2. multi_match Query — Search Across Multiple Fields</h2>
+
+    <p>
+      <code>multi_match</code> runs the same search query across multiple fields at once.
+      Instead of searching only <code>skills</code>, you can search <code>skills</code>, <code>name</code>, and <code>bio</code> simultaneously.
+    </p>
+
+    <div class="analogy">
+      <strong>Think of it like:</strong> Searching a resume — you want "React" to match whether it appears in the skills section, the job title, or the description paragraph.
+    </div>
+
+    <h3>Search "React" across skills AND bio:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React developer",
+      "fields": ["skills", "bio", "name"]
+    }
+  }
+}</pre>
+
+    <h3>Boost a specific field — skills match counts more than bio:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React",
+      "fields": ["skills^3", "bio^1", "name^2"]
+    }
+  }
+}</pre>
+
+    <div class="analogy">
+      <strong>What does ^3 mean?</strong> It's a boost multiplier.<br/>
+      <code>skills^3</code> = a match in skills is 3x more important than a match in bio.<br/>
+      This affects the <code>_score</code> — candidates with React in their skills rank higher than those who only mention it in their bio.
+    </div>
+
+    <h3>multi_match types — control HOW fields are searched:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React developer New York",
+      "fields": ["skills", "bio", "location"],
+      "type": "best_fields"
+    }
+  }
+}</pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>type</th><th>Behavior</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td><code>best_fields</code></td><td>Uses the score of the single best matching field</td><td>Short text like name/title (default)</td></tr>
+          <tr><td><code>most_fields</code></td><td>Adds up scores from all matching fields</td><td>Same content indexed multiple ways</td></tr>
+          <tr><td><code>cross_fields</code></td><td>Treats all fields as one big field</td><td>"New York" split across city + state fields</td></tr>
+          <tr><td><code>phrase</code></td><td>Words must appear in exact order</td><td>Exact phrase matching</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── BOOL ── -->
+  <section id="bool">
+    <span class="topic-label label-green">Topic 3</span>
+    <h2>3. bool Query — Combine Multiple Conditions</h2>
+
+    <p>
+      The <code>bool</code> query is the most powerful query in Elasticsearch.
+      It lets you combine any number of queries using four clauses:
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Clause</th><th>Must match?</th><th>Affects score?</th><th>SQL equivalent</th></tr></thead>
+        <tbody>
+          <tr><td><code>must</code></td><td>Yes — required</td><td>Yes — boosts score</td><td>AND (with ranking)</td></tr>
+          <tr><td><code>filter</code></td><td>Yes — required</td><td>No — just yes/no</td><td>WHERE (fast)</td></tr>
+          <tr><td><code>should</code></td><td>No — optional</td><td>Yes — if matches, boosts score</td><td>OR (nice to have)</td></tr>
+          <tr><td><code>must_not</code></td><td>Must NOT match</td><td>No</td><td>AND NOT</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="analogy">
+      <strong>Simple rule:</strong><br/>
+      Use <code>must</code> for full-text search (relevance matters)<br/>
+      Use <code>filter</code> for yes/no conditions like status, location, date (no scoring needed — faster)
+    </div>
+
+    <h3>Example 1 — must + filter (most common pattern):</h3>
+    <p>Find <strong>active</strong> candidates who know <strong>React</strong> with <strong>3+ years</strong> experience:</p>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "skills": "React" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 3 } } }
+      ]
+    }
+  }
+}</pre>
+    <div class="tip"><strong>Returns:</strong> Alice (4yr, active, React) and Frank (7yr, active, React) — NOT David (inactive) or Carol (no React in top match)</div>
+
+    <h3>Example 2 — should (boost if matches, not required):</h3>
+    <p>Find active candidates — but rank those in New York higher:</p>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "status": "active" } }
+      ],
+      "should": [
+        { "term": { "location": "New York" } }
+      ]
+    }
+  }
+}</pre>
+    <div class="tip"><strong>Returns:</strong> All active candidates, but New York candidates appear at the top with a higher <code>_score</code></div>
+
+    <h3>Example 3 — must_not (exclude results):</h3>
+    <p>Find all candidates who are NOT inactive:</p>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        { "term": { "status": "inactive" } }
+      ]
+    }
+  }
+}</pre>
+
+    <h3>Example 4 — all four clauses together:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "bio": "developer" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 2 } } }
+      ],
+      "should": [
+        { "term": { "location": "New York" } },
+        { "match": { "skills": "React" } }
+      ],
+      "must_not": [
+        { "term": { "location": "Austin" } }
+      ]
+    }
+  }
+}</pre>
+
+    <div class="warning">
+      <strong>minimum_should_match:</strong> By default if you have only <code>should</code> clauses (no must/filter), at least 1 must match. You can control this:<br/>
+      <code>"minimum_should_match": 2</code> — at least 2 should clauses must match
+    </div>
+  </section>
+
+  <!-- ── FILTERS ── -->
+  <section id="filters">
+    <span class="topic-label label-orange">Topic 4</span>
+    <h2>4. Filters — term, range, exists</h2>
+
+    <p>
+      Filters are <strong>yes/no checks</strong> — they don't affect relevance score, they just include or exclude documents.
+      Always put filters inside <code>"filter": []</code> inside a bool query for best performance.
+    </p>
+
+    <h3>4.1 — term filter (exact match)</h3>
+    <p>Use for <code>keyword</code> fields — status, location, email. Must be exact, case-sensitive.</p>
+
+    <div class="query-card">
+      <div class="query-card-header"><span class="topic-label label-orange" style="margin:0">term</span> Find all active candidates</div>
+      <div class="query-card-body">
+        <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "status": "active" } }
+      ]
+    }
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="query-card">
+      <div class="query-card-header"><span class="topic-label label-orange" style="margin:0">terms</span> Match multiple values (IN list)</div>
+      <div class="query-card-body">
+        <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "location": ["New York", "Austin"] } }
+      ]
+    }
+  }
+}</pre>
+        <p style="margin-top:10px; font-size:0.85rem; color:#64748b;">Returns candidates in New York OR Austin — like SQL <code>WHERE location IN ('New York', 'Austin')</code></p>
+      </div>
+    </div>
+
+    <div class="diff-grid">
+      <div class="diff-box diff-no">
+        <h4>Wrong — term on text field</h4>
+        <pre style="background:#fef2f2; color:#991b1b; padding:10px; border-radius:6px; font-size:0.8rem;">{ "term": { "skills": "React" } }
+// skills is a TEXT field — term
+// won't work reliably here</pre>
+      </div>
+      <div class="diff-box diff-yes">
+        <h4>Correct — term on keyword field</h4>
+        <pre style="background:#f0fdf4; color:#15803d; padding:10px; border-radius:6px; font-size:0.8rem;">{ "term": { "skills.keyword": "React" } }
+// use .keyword sub-field for exact match
+// OR use match for text fields</pre>
+      </div>
+    </div>
+
+    <h3>4.2 — range filter (numbers and dates)</h3>
+
+    <div class="query-card">
+      <div class="query-card-header"><span class="topic-label label-orange" style="margin:0">range</span> Experience between 3 and 6 years</div>
+      <div class="query-card-body">
+        <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "experience_years": {
+              "gte": 3,
+              "lte": 6
+            }
+          }
+        }
+      ]
+    }
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>gte</code></td><td>greater than or equal</td><td><code>"gte": 3</code> → 3, 4, 5...</td></tr>
+          <tr><td><code>gt</code></td><td>greater than (exclusive)</td><td><code>"gt": 3</code> → 4, 5...</td></tr>
+          <tr><td><code>lte</code></td><td>less than or equal</td><td><code>"lte": 6</code> → ...4, 5, 6</td></tr>
+          <tr><td><code>lt</code></td><td>less than (exclusive)</td><td><code>"lt": 6</code> → ...4, 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.3 — exists filter (field has a value)</h3>
+    <p>Check if a field exists and has a non-null value in the document.</p>
+
+    <div class="query-card">
+      <div class="query-card-header"><span class="topic-label label-orange" style="margin:0">exists</span> Find candidates who have a bio</div>
+      <div class="query-card-body">
+        <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "exists": { "field": "bio" } }
+      ]
+    }
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="query-card">
+      <div class="query-card-header"><span class="topic-label label-orange" style="margin:0">must_not + exists</span> Find candidates who do NOT have a bio</div>
+      <div class="query-card-body">
+        <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        { "exists": { "field": "bio" } }
+      ]
+    }
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>exists is useful when:</strong> Some documents are missing optional fields. For example — candidates who haven't filled in their bio, or jobs without a salary field.
+    </div>
+  </section>
+
+  <!-- ── HIGHLIGHT ── -->
+  <section id="highlight">
+    <span class="topic-label label-blue">Topic 5</span>
+    <h2>5. Highlight — Show Matched Terms in Results</h2>
+
+    <p>
+      Highlight tells Elasticsearch to return snippets of text where the search term was found,
+      with the matching word wrapped in <code>&lt;em&gt;</code> tags (or custom tags).
+      This is how search engines show you <strong>bold matched words</strong> in results.
+    </p>
+
+    <div class="analogy">
+      <strong>Think of it like:</strong> When you Google something, the result description shows your search words in <strong>bold</strong>. That's exactly what highlight does in Elasticsearch.
+    </div>
+
+    <h3>Basic highlight on bio field:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": {
+      "bio": "React developer"
+    }
+  },
+  "highlight": {
+    "fields": {
+      "bio": {}
+    }
+  }
+}</pre>
+
+    <h3>What the response looks like:</h3>
+    <div class="result-box">{
+  "_source": {
+    "name": "Alice Johnson",
+    "bio": "Alice is an experienced React developer who loves building fast user interfaces."
+  },
+  "highlight": {
+    "bio": [
+      "Alice is an experienced &lt;em&gt;React&lt;/em&gt; &lt;em&gt;developer&lt;/em&gt; who loves building fast user interfaces."
+    ]
+  }
+}</div>
+
+    <div class="tip">
+      <strong>In your React frontend:</strong> Use <code>dangerouslySetInnerHTML</code> to render the highlight snippet — the <code>&lt;em&gt;</code> tags will make matched words italic/bold.
+    </div>
+
+    <h3>Custom highlight tags (use &lt;strong&gt; instead of &lt;em&gt;):</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": { "bio": "React" }
+  },
+  "highlight": {
+    "pre_tags":  ["&lt;strong&gt;"],
+    "post_tags": ["&lt;/strong&gt;"],
+    "fields": {
+      "bio": {}
+    }
+  }
+}</pre>
+
+    <h3>Highlight multiple fields at once:</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "React developer",
+      "fields": ["bio", "skills"]
+    }
+  },
+  "highlight": {
+    "fields": {
+      "bio":    {},
+      "skills": {}
+    }
+  }
+}</pre>
+
+    <h3>Control snippet size (number of characters shown):</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "match": { "bio": "React" }
+  },
+  "highlight": {
+    "fields": {
+      "bio": {
+        "fragment_size": 80,
+        "number_of_fragments": 2
+      }
+    }
+  }
+}</pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>fragment_size</code></td><td>100</td><td>Characters in each snippet</td></tr>
+          <tr><td><code>number_of_fragments</code></td><td>5</td><td>How many snippets to return per field</td></tr>
+          <tr><td><code>pre_tags</code></td><td><code>&lt;em&gt;</code></td><td>Opening tag around matched word</td></tr>
+          <tr><td><code>post_tags</code></td><td><code>&lt;/em&gt;</code></td><td>Closing tag around matched word</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── COMBINED ── -->
+  <section id="combined">
+    <span class="topic-label label-green">Topic 6</span>
+    <h2>6. Combined — Full-Text Search + Structured Filters + Highlight</h2>
+
+    <p>
+      This is how a real talent search feature works — combining everything you learned
+      into one powerful query.
+    </p>
+
+    <h3>Real-world example: "Find active React developers in New York with 3+ years, highlight matched bio text"</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "React developer",
+            "fields": ["skills^3", "bio^1"],
+            "type": "best_fields"
+          }
+        }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "term":  { "location": "New York" } },
+        { "range": { "experience_years": { "gte": 3 } } },
+        { "exists": { "field": "bio" } }
+      ]
+    }
+  },
+  "highlight": {
+    "fields": {
+      "bio":    { "fragment_size": 100 },
+      "skills": {}
+    }
+  },
+  "sort": [
+    { "_score": { "order": "desc" } },
+    { "experience_years": { "order": "desc" } }
+  ],
+  "_source": ["name", "email", "skills", "location", "experience_years", "status"]
+}</pre>
+
+    <h3>Breaking down each part:</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Part</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>must → multi_match</code></td><td>Full-text search "React developer" across skills (3x boost) and bio — affects ranking</td></tr>
+          <tr><td><code>filter → term status</code></td><td>Only active candidates — hard yes/no, no scoring</td></tr>
+          <tr><td><code>filter → term location</code></td><td>Only New York candidates</td></tr>
+          <tr><td><code>filter → range experience</code></td><td>Only 3+ years experience</td></tr>
+          <tr><td><code>filter → exists bio</code></td><td>Only candidates who have a bio</td></tr>
+          <tr><td><code>highlight</code></td><td>Show matched words in bio and skills with &lt;em&gt; tags</td></tr>
+          <tr><td><code>sort</code></td><td>Sort by relevance score first, then experience</td></tr>
+          <tr><td><code>_source</code></td><td>Only return these fields (like SQL SELECT — skip bio from source since highlight covers it)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Simpler combined query — search bar with filters (typical search page):</h3>
+    <pre>GET /candidates/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "skills": "Python" } }
+      ],
+      "filter": [
+        { "term":  { "status": "active" } },
+        { "range": { "experience_years": { "gte": 2, "lte": 8 } } }
+      ],
+      "should": [
+        { "term": { "location": "New York" } }
+      ]
+    }
+  },
+  "highlight": {
+    "fields": { "skills": {}, "bio": {} }
+  }
+}</pre>
+  </section>
+
+  <!-- ── CHEAT SHEET ── -->
+  <section id="cheatsheet">
+    <span class="phase-label">Reference</span>
+    <h2>7. Quick Reference Cheat Sheet</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Query / Filter</th><th>Field Type</th><th>Use When</th><th>Affects Score?</th></tr></thead>
+        <tbody>
+          <tr><td><code>match</code></td><td>text</td><td>Search one field full-text</td><td>Yes</td></tr>
+          <tr><td><code>match</code> + operator: and</td><td>text</td><td>All words must appear</td><td>Yes</td></tr>
+          <tr><td><code>match</code> + fuzziness</td><td>text</td><td>Allow typos</td><td>Yes</td></tr>
+          <tr><td><code>multi_match</code></td><td>text (multiple)</td><td>Search across several fields</td><td>Yes</td></tr>
+          <tr><td><code>multi_match</code> + boost ^</td><td>text</td><td>Some fields matter more</td><td>Yes</td></tr>
+          <tr><td><code>bool → must</code></td><td>any</td><td>Required + affects score</td><td>Yes</td></tr>
+          <tr><td><code>bool → filter</code></td><td>any</td><td>Required, no scoring (fast)</td><td>No</td></tr>
+          <tr><td><code>bool → should</code></td><td>any</td><td>Optional boost</td><td>Yes</td></tr>
+          <tr><td><code>bool → must_not</code></td><td>any</td><td>Exclude documents</td><td>No</td></tr>
+          <tr><td><code>term</code></td><td>keyword</td><td>Exact match one value</td><td>No (in filter)</td></tr>
+          <tr><td><code>terms</code></td><td>keyword</td><td>Match one of several values</td><td>No (in filter)</td></tr>
+          <tr><td><code>range</code></td><td>integer / date</td><td>Greater/less than</td><td>No (in filter)</td></tr>
+          <tr><td><code>exists</code></td><td>any</td><td>Field has a value</td><td>No (in filter)</td></tr>
+          <tr><td><code>highlight</code></td><td>text</td><td>Show matched words in snippet</td><td>N/A</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Golden Rule:</h3>
+    <div class="analogy">
+      <strong>must vs filter — when to use which?</strong><br/><br/>
+      <strong>must</strong> → when relevance/ranking matters (full-text search fields like skills, bio, name)<br/>
+      <strong>filter</strong> → when it's a hard yes/no condition (status, location, date, number ranges)<br/><br/>
+      Filters are cached by Elasticsearch and are significantly faster — always prefer filter for structured conditions.
+    </div>
+
+    <div class="tip" style="margin-top: 20px;">
+      <strong>You've completed the Advanced Queries module!</strong><br/>
+      You now know how to write production-level Elasticsearch queries combining full-text search, structured filters, relevance boosting, and result highlighting.
+    </div>
+  </section>
+
+</main>
+</body>
+</html>
