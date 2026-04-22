@@ -1,0 +1,15 @@
+{
+  "name": "search-ui-demo-server",
+  "version": "1.0.0",
+  "description": "Express + MongoDB search API for search-ui-demo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "seed":  "node scripts/seed.js"
+  },
+  "dependencies": {
+    "cors":       "^2.8.5",
+    "express":    "^4.18.2",
+    "mongoose":   "^8.3.0"
+  }
+}

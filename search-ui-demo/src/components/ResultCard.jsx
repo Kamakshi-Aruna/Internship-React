@@ -10,9 +10,10 @@ const { Text, Paragraph } = Typography;
 
 // Colour for each status badge
 const STATUS_COLOR = {
-  active:   "green",
-  hired:    "blue",
-  inactive: "default",
+  Applied:   "orange",
+  Interview: "blue",
+  Hired:     "green",
+  Rejected:  "red",
 };
 
 /**
@@ -23,7 +24,7 @@ const STATUS_COLOR = {
  *   query      — the current search string (used to highlight matches)
  */
 function ResultCard({ candidate, query }) {
-  const { name, status, location, experience_years, skills, bio } = candidate;
+  const { name, status, location, experience_years, skills = [], bio } = candidate;
 
   return (
     <Card
