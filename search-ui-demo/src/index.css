@@ -1,0 +1,4 @@
+/* Hide scrollbar in Chrome, Safari, Opera */
+.ant-modal-body::-webkit-scrollbar {
+  display: none;
+}

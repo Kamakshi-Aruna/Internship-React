@@ -12,19 +12,10 @@ const LOCATION_OPTIONS = [
   "Los Angeles", "Boston", "Denver", "Remote",
 ].map((l) => ({ value: l, label: l }));
 
-/**
- * AddCandidateModal
- *
- * Props:
- *   open      — boolean
- *   onClose   — () => void
- *   onCreated — (newCandidate) => void  called after successful POST
- */
 function AddCandidateModal({ open, onClose, onCreated }) {
   const [form] = Form.useForm();
 
   async function handleSubmit(values) {
-    // skills comes as an array from the Select tags mode
     const res = await fetch("/api/candidates", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
@@ -41,74 +32,86 @@ function AddCandidateModal({ open, onClose, onCreated }) {
     onCreated(created);
   }
 
+  function handleCancel() {
+    form.resetFields();
+    onClose();
+  }
+
   return (
     <Modal
       title="Add Candidate"
       open={open}
-      onCancel={() => { form.resetFields(); onClose(); }}
-      footer={null}
-      width={540}
+      onCancel={handleCancel}
+      width={520}
       destroyOnClose
+      // Sticky footer — rendered outside the scrollable body
+      footer={
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button type="primary" onClick={() => form.submit()}>
+            Add Candidate
+          </Button>
+        </div>
+      }
+      // Constrain body height so it scrolls instead of growing the modal
+      styles={{
+        body: {
+          maxHeight: "55vh",
+          overflowY: "auto",
+          scrollbarWidth: "none",       // Firefox
+          msOverflowStyle: "none",      // IE/Edge
+        },
+      }}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{ status: "Applied", experience_years: 0 }}
-        style={{ marginTop: 16 }}
+        style={{ marginTop: 8 }}
+        size="middle"
       >
-        <Form.Item name="name" label="Full Name" rules={[{ required: true, message: "Name is required" }]}>
+        <Form.Item name="name" label="Full Name" rules={[{ required: true, message: "Name is required" }]} style={{ marginBottom: 10 }}>
           <Input placeholder="e.g. Alice Johnson" />
         </Form.Item>
 
-        <Form.Item name="email" label="Email" rules={[{ type: "email", message: "Enter a valid email" }]}>
+        <Form.Item name="email" label="Email" rules={[{ type: "email", message: "Enter a valid email" }]} style={{ marginBottom: 10 }}>
           <Input placeholder="e.g. alice@example.com" />
         </Form.Item>
 
-        <Form.Item name="role" label="Role / Job Title">
+        <Form.Item name="role" label="Role / Job Title" style={{ marginBottom: 10 }}>
           <Input placeholder="e.g. Frontend Engineer" />
         </Form.Item>
 
         <div style={{ display: "flex", gap: 12 }}>
-          <Form.Item name="status" label="Status" style={{ flex: 1 }}>
+          <Form.Item name="status" label="Status" style={{ flex: 1, marginBottom: 10 }}>
             <Select options={STATUS_OPTIONS} />
           </Form.Item>
 
-          <Form.Item name="experience_years" label="Experience (years)" style={{ flex: 1 }}>
+          <Form.Item name="experience_years" label="Experience (yrs)" style={{ flex: 1, marginBottom: 10 }}>
             <InputNumber min={0} max={50} style={{ width: "100%" }} />
           </Form.Item>
         </div>
 
-        <Form.Item name="location" label="Location">
+        <Form.Item name="location" label="Location" style={{ marginBottom: 10 }}>
           <Select
             options={LOCATION_OPTIONS}
             showSearch
             allowClear
             placeholder="Select or type a city"
-            mode={undefined}
           />
         </Form.Item>
 
-        <Form.Item name="skills" label="Skills">
-          {/* tags mode lets user type any skill and press Enter to add */}
+        <Form.Item name="skills" label="Skills" style={{ marginBottom: 10 }}>
           <Select
             mode="tags"
-            placeholder="Type a skill and press Enter  (e.g. React, Node.js)"
+            placeholder="Type a skill and press Enter (e.g. React, Node.js)"
             tokenSeparators={[","]}
           />
         </Form.Item>
 
-        <Form.Item name="bio" label="Bio">
-          <Input.TextArea rows={3} placeholder="Short description of the candidate…" />
-        </Form.Item>
-
-        <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-          <Button onClick={() => { form.resetFields(); onClose(); }} style={{ marginRight: 8 }}>
-            Cancel
-          </Button>
-          <Button type="primary" htmlType="submit">
-            Add Candidate
-          </Button>
+        <Form.Item name="bio" label="Bio" style={{ marginBottom: 4 }}>
+          <Input.TextArea rows={2} placeholder="Short description of the candidate…" />
         </Form.Item>
       </Form>
     </Modal>
