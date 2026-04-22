@@ -1,0 +1,273 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# ES AGGREGATIONS — Kibana Dev Tools Queries
+# Paste any block into Kibana → Dev Tools → Console and press ▶
+#
+# Prerequisite: run elasticsearch-concepts-demo first to populate the
+#               "candidates" index with sample data.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# PART 1: TERMS AGGREGATION — Faceted Counts
+# Think of it as SQL GROUP BY on keyword fields.
+# "size: 0" means — don't return any raw documents, just the aggregation result.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 1a. Count candidates per skill (tag cloud / filter sidebar)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_skills": {
+      "terms": {
+        "field": "skills.keyword",
+        "size": 10
+      }
+    }
+  }
+}
+
+# 1b. Count candidates per location
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_location": {
+      "terms": {
+        "field": "location",
+        "size": 20
+      }
+    }
+  }
+}
+
+# 1c. Count candidates per status (active / inactive / hired)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_status": {
+      "terms": {
+        "field": "status"
+      }
+    }
+  }
+}
+
+# 1d. ALL three facets in a single Elasticsearch query (most efficient)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "skills_facet": {
+      "terms": { "field": "skills.keyword", "size": 10 }
+    },
+    "location_facet": {
+      "terms": { "field": "location", "size": 20 }
+    },
+    "status_facet": {
+      "terms": { "field": "status" }
+    }
+  }
+}
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# PART 2: DATE HISTOGRAM AGGREGATION — Trend Charts
+# Groups documents into equal-width time buckets.
+# Perfect for line/bar charts showing activity over time.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 2a. Applications per month (most common use case)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "applications_per_month": {
+      "date_histogram": {
+        "field": "applied_at",
+        "calendar_interval": "month",
+        "format": "yyyy-MM",
+        "min_doc_count": 0,
+        "extended_bounds": {
+          "min": "now-1y/M",
+          "max": "now/M"
+        }
+      }
+    }
+  }
+}
+
+# 2b. Applications per week
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "applications_per_week": {
+      "date_histogram": {
+        "field": "applied_at",
+        "calendar_interval": "week",
+        "format": "yyyy-MM-dd"
+      }
+    }
+  }
+}
+
+# 2c. Applications per year
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "applications_per_year": {
+      "date_histogram": {
+        "field": "applied_at",
+        "calendar_interval": "year",
+        "format": "yyyy"
+      }
+    }
+  }
+}
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# PART 3: NESTED / MULTI-LEVEL AGGREGATIONS — Drill-Down
+# Put one aggregation inside another using the "aggs" key inside a bucket agg.
+# SQL analogy: first GROUP BY, then GROUP BY again inside each group.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 3a. For each location — what are the top 5 skills? (2 levels deep)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_location": {
+      "terms": {
+        "field": "location",
+        "size": 10
+      },
+      "aggs": {
+        "top_skills_here": {
+          "terms": {
+            "field": "skills.keyword",
+            "size": 5
+          }
+        }
+      }
+    }
+  }
+}
+
+# 3b. For each status — avg, min, max experience years (metric sub-aggs)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_status": {
+      "terms": { "field": "status" },
+      "aggs": {
+        "avg_exp": { "avg": { "field": "experience_years" } },
+        "min_exp": { "min": { "field": "experience_years" } },
+        "max_exp": { "max": { "field": "experience_years" } }
+      }
+    }
+  }
+}
+
+# 3c. Applications per month → broken down by location (3 levels: date → location → count)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_month": {
+      "date_histogram": {
+        "field": "applied_at",
+        "calendar_interval": "month",
+        "format": "yyyy-MM"
+      },
+      "aggs": {
+        "by_location": {
+          "terms": {
+            "field": "location",
+            "size": 5
+          }
+        }
+      }
+    }
+  }
+}
+
+# 3d. Skills by location WITH average experience per skill (3 metric sub-aggs)
+GET candidates/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_location": {
+      "terms": { "field": "location", "size": 5 },
+      "aggs": {
+        "top_skills": {
+          "terms": { "field": "skills.keyword", "size": 5 },
+          "aggs": {
+            "avg_exp_for_skill": {
+              "avg": { "field": "experience_years" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# PART 4: AGGREGATIONS + FILTER QUERY
+# You can limit which documents go INTO the aggregation using a query.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 4a. Top skills — only among ACTIVE candidates
+GET candidates/_search
+{
+  "size": 0,
+  "query": {
+    "term": { "status": "active" }
+  },
+  "aggs": {
+    "active_skills": {
+      "terms": {
+        "field": "skills.keyword",
+        "size": 10
+      }
+    }
+  }
+}
+
+# 4b. Applications per month — only candidates with 5+ years experience
+GET candidates/_search
+{
+  "size": 0,
+  "query": {
+    "range": { "experience_years": { "gte": 5 } }
+  },
+  "aggs": {
+    "senior_applications_trend": {
+      "date_histogram": {
+        "field": "applied_at",
+        "calendar_interval": "month",
+        "format": "yyyy-MM"
+      }
+    }
+  }
+}
+
+# 4c. Location counts — only for candidates with "React" skill
+GET candidates/_search
+{
+  "size": 0,
+  "query": {
+    "term": { "skills.keyword": "React" }
+  },
+  "aggs": {
+    "react_devs_by_location": {
+      "terms": { "field": "location", "size": 10 }
+    }
+  }
+}

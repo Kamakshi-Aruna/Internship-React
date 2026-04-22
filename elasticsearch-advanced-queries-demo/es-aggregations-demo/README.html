@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ES Aggregations — Beginner Guide</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card: #f8f9fa;
+      --border: #dee2e6;
+      --accent: #0077b6;
+      --accent2: #e76f00;
+      --accent3: #028a60;
+      --text: #212529;
+      --muted: #6c757d;
+      --code-bg: #f1f3f5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.7; }
+    .hero { background: linear-gradient(135deg, #e8f4f8 0%, #f0f7ff 100%); padding: 56px 40px 40px; border-bottom: 1px solid var(--border); }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 700px; }
+    .badges { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    .badge { background: var(--border); color: var(--accent); border-radius: 999px; padding: 4px 14px; font-size: 0.78rem; font-weight: 600; letter-spacing: .5px; }
+    .badge.orange { color: var(--accent2); }
+    .badge.green  { color: var(--accent3); }
+    .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+    h2 { font-size: 1.45rem; font-weight: 700; color: var(--accent); margin: 48px 0 16px; display: flex; align-items: center; gap: 10px; }
+    h2 .num { background: var(--accent); color: #000; border-radius: 50%; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: var(--accent2); margin: 28px 0 10px; }
+    p { color: var(--text); margin-bottom: 12px; }
+    .muted { color: var(--muted); font-size: .93rem; }
+    pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; overflow-x: auto; margin: 14px 0 24px; font-size: .88rem; line-height: 1.65; }
+    code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
+    .kw  { color: #0550ae; }
+    .str { color: #b44800; }
+    .num-c { color: #116329; }
+    .cmt { color: #6e7781; }
+    .key { color: #0550ae; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin-bottom: 20px; }
+    .card h4 { font-size: .95rem; font-weight: 600; margin-bottom: 8px; color: var(--accent3); }
+    .analogy { background: #e8f8f2; border-left: 3px solid var(--accent3); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: .93rem; }
+    .tip { background: #e8f4fb; border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: .93rem; }
+    .endpoint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .endpoint { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .endpoint .method { color: var(--accent3); font-weight: 700; font-size: .8rem; letter-spacing: .5px; }
+    .endpoint .path { color: var(--accent); font-family: monospace; font-size: .92rem; margin: 4px 0; }
+    .endpoint .desc { color: var(--muted); font-size: .83rem; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+    .setup-step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+    .step-num { background: var(--accent2); color: #000; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; flex-shrink: 0; margin-top: 2px; }
+    @media (max-width: 640px) { .endpoint-grid { grid-template-columns: 1fr; } .hero { padding: 32px 20px; } }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>ES Aggregations — Beginner Guide</h1>
+  <p>Learn how Elasticsearch aggregations work: <strong>Terms</strong> for faceted counts, <strong>Date Histogram</strong> for trend charts, and <strong>Nested</strong> aggregations for multi-level drill-down. All exposed via a REST API.</p>
+  <div class="badges">
+    <span class="badge">Elasticsearch 8.x</span>
+    <span class="badge">Node.js + Express</span>
+    <span class="badge orange">REST API</span>
+    <span class="badge green">Beginner Friendly</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── SETUP ─────────────────────────────────────────────────────────────── -->
+  <h2><span class="num">0</span> Setup</h2>
+  <p>Before starting, make sure Elasticsearch is running and the <code>candidates</code> index is populated.</p>
+
+  <div class="setup-step">
+    <div class="step-num">1</div>
+    <div>
+      <strong>Start Elasticsearch</strong> (from the <code>elasticsearch-concepts-demo</code> folder)<br>
+      <code>docker-compose up -d</code>
+    </div>
+  </div>
+  <div class="setup-step">
+    <div class="step-num">2</div>
+    <div>
+      <strong>Index candidates data</strong><br>
+      <code>cd ../elasticsearch-concepts-demo &amp;&amp; npm run index</code>
+    </div>
+  </div>
+  <div class="setup-step">
+    <div class="step-num">3</div>
+    <div>
+      <strong>Install dependencies and start the API server</strong><br>
+      <code>npm install &amp;&amp; npm start</code><br>
+      <span class="muted">Server runs at http://localhost:3003</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── WHAT IS AN AGGREGATION ─────────────────────────────────────────────── -->
+  <h2><span class="num">1</span> What is an Aggregation?</h2>
+
+  <div class="analogy">
+    <strong>Simple analogy:</strong> A regular ES search says "give me documents that match this query." An aggregation says "give me statistics <em>about</em> those documents — counts, averages, time buckets, etc."
+  </div>
+
+  <p>In SQL terms:</p>
+  <ul style="margin: 10px 0 16px 24px; color: var(--text);">
+    <li><strong>Regular search</strong> → <code>SELECT * FROM candidates WHERE name LIKE '%React%'</code></li>
+    <li><strong>Aggregation</strong> → <code>SELECT location, COUNT(*) FROM candidates GROUP BY location</code></li>
+  </ul>
+
+  <p>The key pattern: use <code>"size": 0</code> when you only want aggregation results (not raw documents).</p>
+
+  <pre><code><span class="cmt">// Basic aggregation shape</span>
+GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,        <span class="cmt">// skip raw documents — only want stats</span>
+  <span class="key">"aggs"</span>: {
+    <span class="key">"my_agg_name"</span>: {  <span class="cmt">// you pick the name</span>
+      <span class="key">"terms"</span>: {       <span class="cmt">// aggregation type</span>
+        <span class="key">"field"</span>: <span class="str">"location"</span>
+      }
+    }
+  }
+}</code></pre>
+
+  <hr class="divider">
+
+  <!-- ── TERMS AGGREGATION ───────────────────────────────────────────────────── -->
+  <h2><span class="num">2</span> Terms Aggregation — Faceted Counts</h2>
+  <p>The most common aggregation. Counts how many documents fall into each unique value of a keyword field. Perfect for filter sidebars, tag clouds, and pie charts.</p>
+
+  <div class="analogy">
+    SQL: <code>SELECT status, COUNT(*) FROM candidates GROUP BY status</code>
+  </div>
+
+  <h3>2a. Count by Location</h3>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"by_location"</span>: {
+      <span class="key">"terms"</span>: {
+        <span class="key">"field"</span>: <span class="str">"location"</span>,  <span class="cmt">// must be a keyword field</span>
+        <span class="key">"size"</span>: <span class="num-c">20</span>            <span class="cmt">// top 20 locations</span>
+      }
+    }
+  }
+}</code></pre>
+
+  <p class="muted">Response shape: <code>aggregations.by_location.buckets</code> → array of <code>{ key: "San Francisco", doc_count: 12 }</code></p>
+
+  <h3>2b. Count by Skill (keyword sub-field)</h3>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"top_skills"</span>: {
+      <span class="key">"terms"</span>: {
+        <span class="key">"field"</span>: <span class="str">"skills.keyword"</span>,  <span class="cmt">// .keyword = exact match sub-field</span>
+        <span class="key">"size"</span>: <span class="num-c">10</span>
+      }
+    }
+  }
+}</code></pre>
+
+  <div class="tip">
+    <strong>Why <code>.keyword</code>?</strong> Text fields (like <code>skills</code>) are analyzed (tokenized) for full-text search. To aggregate on exact values you need the raw keyword sub-field. In the mapping: <code>"skills": { "type": "text", "fields": { "keyword": { "type": "keyword" } } }</code>
+  </div>
+
+  <h3>2c. All Facets in One Query</h3>
+  <p>You can define multiple top-level aggregations — ES computes them all in one pass:</p>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"skills_facet"</span>:   { <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"skills.keyword"</span>, <span class="key">"size"</span>: <span class="num-c">10</span> } },
+    <span class="key">"location_facet"</span>: { <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"location"</span> } },
+    <span class="key">"status_facet"</span>:   { <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"status"</span> } }
+  }
+}</code></pre>
+
+  <hr class="divider">
+
+  <!-- ── DATE HISTOGRAM ─────────────────────────────────────────────────────── -->
+  <h2><span class="num">3</span> Date Histogram Aggregation — Trend Charts</h2>
+  <p>Groups documents into equal-width time buckets. Great for line charts showing how activity changes over time.</p>
+
+  <div class="analogy">
+    SQL: <code>SELECT DATE_FORMAT(applied_at, '%Y-%m'), COUNT(*) FROM candidates GROUP BY 1</code>
+  </div>
+
+  <h3>3a. Applications per Month</h3>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"applications_trend"</span>: {
+      <span class="key">"date_histogram"</span>: {
+        <span class="key">"field"</span>:             <span class="str">"applied_at"</span>,  <span class="cmt">// must be a date field</span>
+        <span class="key">"calendar_interval"</span>: <span class="str">"month"</span>,       <span class="cmt">// day | week | month | quarter | year</span>
+        <span class="key">"format"</span>:           <span class="str">"yyyy-MM"</span>,     <span class="cmt">// human-readable bucket keys</span>
+        <span class="key">"min_doc_count"</span>:     <span class="num-c">0</span>              <span class="cmt">// include months with 0 applications</span>
+      }
+    }
+  }
+}</code></pre>
+
+  <p class="muted">Response: <code>{ key_as_string: "2024-03", doc_count: 5 }</code> — one bucket per month.</p>
+
+  <h3>3b. Extended Bounds (show empty months)</h3>
+  <pre><code><span class="key">"date_histogram"</span>: {
+  <span class="key">"field"</span>:             <span class="str">"applied_at"</span>,
+  <span class="key">"calendar_interval"</span>: <span class="str">"month"</span>,
+  <span class="key">"format"</span>:           <span class="str">"yyyy-MM"</span>,
+  <span class="key">"min_doc_count"</span>:     <span class="num-c">0</span>,           <span class="cmt">// allow empty buckets</span>
+  <span class="key">"extended_bounds"</span>: {
+    <span class="key">"min"</span>: <span class="str">"now-1y/M"</span>,             <span class="cmt">// start of last year</span>
+    <span class="key">"max"</span>: <span class="str">"now/M"</span>                <span class="cmt">// current month</span>
+  }
+}</code></pre>
+
+  <div class="tip">
+    <strong>Tip:</strong> Without <code>extended_bounds</code>, ES only returns months that have data. With it, you get a complete timeline — important for line charts that shouldn't have gaps.
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── NESTED AGGREGATIONS ────────────────────────────────────────────────── -->
+  <h2><span class="num">4</span> Nested (Multi-Level) Aggregations — Drill-Down</h2>
+  <p>Put an <code>aggs</code> block <em>inside</em> a bucket aggregation to drill down further. ES computes the inner aggregation separately for each bucket of the outer one.</p>
+
+  <h3>4a. Skills per Location (2 levels deep)</h3>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"by_location"</span>: {
+      <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"location"</span>, <span class="key">"size"</span>: <span class="num-c">10</span> },
+
+      <span class="key">"aggs"</span>: {                        <span class="cmt">// ← nested agg lives here</span>
+        <span class="key">"top_skills"</span>: {
+          <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"skills.keyword"</span>, <span class="key">"size"</span>: <span class="num-c">5</span> }
+        }
+      }
+    }
+  }
+}
+<span class="cmt">// Result shape:
+// by_location.buckets[0].key         → "San Francisco"
+// by_location.buckets[0].doc_count   → 8
+// by_location.buckets[0].top_skills.buckets → [{ key: "React", doc_count: 5 }, ...]</span></code></pre>
+
+  <h3>4b. Metric Sub-Aggregations (avg, min, max)</h3>
+  <p>Metric aggregations compute a single number (not buckets) from the matched documents:</p>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"by_status"</span>: {
+      <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"status"</span> },
+
+      <span class="key">"aggs"</span>: {
+        <span class="key">"avg_exp"</span>: { <span class="key">"avg"</span>: { <span class="key">"field"</span>: <span class="str">"experience_years"</span> } },
+        <span class="key">"min_exp"</span>: { <span class="key">"min"</span>: { <span class="key">"field"</span>: <span class="str">"experience_years"</span> } },
+        <span class="key">"max_exp"</span>: { <span class="key">"max"</span>: { <span class="key">"field"</span>: <span class="str">"experience_years"</span> } }
+      }
+    }
+  }
+}</code></pre>
+
+  <h3>4c. Date → Location (3 levels: month → location → count)</h3>
+  <pre><code>GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"aggs"</span>: {
+    <span class="key">"by_month"</span>: {
+      <span class="key">"date_histogram"</span>: {
+        <span class="key">"field"</span>: <span class="str">"applied_at"</span>, <span class="key">"calendar_interval"</span>: <span class="str">"month"</span>, <span class="key">"format"</span>: <span class="str">"yyyy-MM"</span>
+      },
+      <span class="key">"aggs"</span>: {
+        <span class="key">"by_location"</span>: {
+          <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"location"</span>, <span class="key">"size"</span>: <span class="num-c">5</span> }
+        }
+      }
+    }
+  }
+}</code></pre>
+
+  <hr class="divider">
+
+  <!-- ── AGGREGATIONS + QUERY ───────────────────────────────────────────────── -->
+  <h2><span class="num">5</span> Aggregations + Query Filter</h2>
+  <p>Add a <code>"query"</code> block to limit which documents go <em>into</em> the aggregation. The aggregation then runs only on the matching subset.</p>
+
+  <pre><code><span class="cmt">// Top skills — only among ACTIVE candidates</span>
+GET candidates/_search
+{
+  <span class="key">"size"</span>: <span class="num-c">0</span>,
+  <span class="key">"query"</span>: {
+    <span class="key">"term"</span>: { <span class="key">"status"</span>: <span class="str">"active"</span> }
+  },
+  <span class="key">"aggs"</span>: {
+    <span class="key">"active_skills"</span>: {
+      <span class="key">"terms"</span>: { <span class="key">"field"</span>: <span class="str">"skills.keyword"</span>, <span class="key">"size"</span>: <span class="num-c">10</span> }
+    }
+  }
+}</code></pre>
+
+  <hr class="divider">
+
+  <!-- ── REST API ENDPOINTS ─────────────────────────────────────────────────── -->
+  <h2><span class="num">6</span> REST API Endpoints (<code>server.js</code>)</h2>
+  <p>Run <code>npm start</code> to start the server at <strong>http://localhost:3003</strong>.</p>
+
+  <div class="endpoint-grid">
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/skills</div>
+      <div class="desc">Top skills across all candidates</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/locations</div>
+      <div class="desc">Candidate count per location</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/status</div>
+      <div class="desc">Candidate count per status</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/facets</div>
+      <div class="desc">All three facets in one ES query</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/applications-over-time</div>
+      <div class="desc">Applications per month (add <code>?interval=week</code>)</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/skills-by-location</div>
+      <div class="desc">Top skills for each location (nested)</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/experience-by-status</div>
+      <div class="desc">Avg/min/max experience per status (metric sub-aggs)</div>
+    </div>
+    <div class="endpoint">
+      <div class="method">GET</div>
+      <div class="path">/api/agg/monthly-by-location</div>
+      <div class="desc">Applications per month → per location (3-level)</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── QUICK REFERENCE ────────────────────────────────────────────────────── -->
+  <h2><span class="num">7</span> Quick Reference</h2>
+
+  <div class="card">
+    <h4>Aggregation Types Covered</h4>
+    <table style="width:100%; border-collapse: collapse; font-size: .9rem; margin-top: 8px;">
+      <tr style="border-bottom: 1px solid var(--border);">
+        <th style="text-align:left; padding: 8px; color: var(--accent);">Type</th>
+        <th style="text-align:left; padding: 8px; color: var(--accent);">Keyword</th>
+        <th style="text-align:left; padding: 8px; color: var(--accent);">Use For</th>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="padding: 8px;">Bucket</td>
+        <td style="padding: 8px;"><code>terms</code></td>
+        <td style="padding: 8px;">Group by keyword value (status, location)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="padding: 8px;">Bucket</td>
+        <td style="padding: 8px;"><code>date_histogram</code></td>
+        <td style="padding: 8px;">Group by time interval (month, week, year)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="padding: 8px;">Metric</td>
+        <td style="padding: 8px;"><code>avg</code></td>
+        <td style="padding: 8px;">Average of a numeric field</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="padding: 8px;">Metric</td>
+        <td style="padding: 8px;"><code>min</code> / <code>max</code></td>
+        <td style="padding: 8px;">Minimum / maximum of a numeric field</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px;">Nested</td>
+        <td style="padding: 8px;"><code>aggs inside aggs</code></td>
+        <td style="padding: 8px;">Drill-down: compute stats within each bucket</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h4>Common Gotchas</h4>
+    <ul style="margin-left: 20px; font-size: .93rem; line-height: 2;">
+      <li>Use <code>skills.keyword</code> (not <code>skills</code>) for terms agg on text fields</li>
+      <li>Use <code>calendar_interval</code> in ES 8.x (not the old <code>interval</code>)</li>
+      <li>Set <code>"size": 0</code> when you only need aggregation output</li>
+      <li>The aggregation <code>name</code> (<code>"by_location"</code>) is arbitrary — you choose it</li>
+      <li><code>min_doc_count: 0</code> + <code>extended_bounds</code> = complete timeline with zero-gaps</li>
+    </ul>
+  </div>
+
+  <p style="margin-top: 40px; color: var(--muted); font-size: .85rem;">
+    See <code>kibana-queries/aggregations.txt</code> for copy-paste Kibana Dev Tools examples covering all patterns above.
+  </p>
+
+</div>
+</body>
+</html>
