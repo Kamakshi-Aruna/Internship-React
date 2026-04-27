@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Talent Tracker — Every File Explained</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header p  { margin-top: 8px; font-size: 1rem; opacity: 0.8; }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    main { max-width: 980px; margin: 40px auto; padding: 0 24px 60px; }
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8edf5;
+    }
+    h3 { font-size: 1rem; font-weight: 600; color: #16213e; margin: 24px 0 10px; }
+    p  { margin-bottom: 10px; font-size: 0.92rem; }
+
+    pre {
+      background: #1e2a3a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 10px 0 14px;
+      white-space: pre;
+    }
+    code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.83em;
+      background: #eef2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0f3460;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    .tip {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      border-radius: 0 8px 8px 0;
+      padding: 13px 17px;
+      margin: 12px 0;
+      font-size: 0.88rem;
+    }
+    .tip strong { color: #15803d; }
+
+    .analogy {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 13px 17px;
+      margin: 12px 0;
+      font-size: 0.88rem;
+    }
+    .analogy strong { color: #1d4ed8; }
+
+    .warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 13px 17px;
+      margin: 12px 0;
+      font-size: 0.88rem;
+    }
+    .warning strong { color: #b45309; }
+
+    /* ── file card ── */
+    .file-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin: 18px 0;
+      overflow: hidden;
+    }
+    .file-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8f9fc;
+      padding: 12px 18px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .file-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+    .file-path {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #0f3460;
+    }
+    .file-card-body {
+      padding: 16px 20px;
+    }
+    .file-card-body p { margin-bottom: 8px; font-size: 0.9rem; }
+    .why-tag {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .why-tag.green  { background: #15803d; }
+    .why-tag.amber  { background: #b45309; }
+    .why-tag.purple { background: #7e22ce; }
+    .why-tag.red    { background: #b91c1c; }
+    .why-tag.teal   { background: #0d9488; }
+    .why-tag.pink   { background: #be185d; }
+
+    /* ── file tree ── */
+    .file-tree {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.8rem;
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px 24px;
+      line-height: 2;
+      color: #334155;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .ft-folder  { color: #0f3460; font-weight: 700; }
+    .ft-config  { color: #b45309; }
+    .ft-server  { color: #15803d; }
+    .ft-react   { color: #0d9488; }
+    .ft-style   { color: #be185d; }
+    .ft-comment { color: #94a3b8; }
+
+    /* ── toc ── */
+    .toc { list-style: none; padding-left: 0; }
+    .toc li { padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .toc a  { color: #0f3460; text-decoration: none; font-size: 0.88rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── concept grid ── */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .concept-card {
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .concept-card .icon { font-size: 2rem; margin-bottom: 8px; }
+    .concept-card h4    { font-size: 0.88rem; color: #0f3460; margin-bottom: 5px; }
+    .concept-card p     { font-size: 0.78rem; color: #64748b; margin: 0; }
+
+    /* ── data flow arrow list ── */
+    .flow { list-style: none; padding: 0; }
+    .flow li {
+      padding: 10px 16px;
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .flow li .arrow { color: #0f3460; font-weight: 900; font-size: 1.1rem; }
+
+    ul.bullets { padding-left: 20px; margin: 8px 0 12px; }
+    ul.bullets li { margin-bottom: 5px; font-size: 0.9rem; }
+
+    .phase-label {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Talent Tracker — Every File Explained</h1>
+  <p>A beginner-friendly guide: what each file is, why it exists, and how they all fit together</p>
+  <div class="badge-row">
+    <span class="badge">React 19</span>
+    <span class="badge">Express.js</span>
+    <span class="badge">MongoDB</span>
+    <span class="badge">Firebase Auth</span>
+    <span class="badge">Ant Design</span>
+    <span class="badge">AG Grid</span>
+    <span class="badge">Beginner Friendly</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ─────────────── TOC ─────────────── -->
+  <section id="toc">
+    <h2>Table of Contents</h2>
+    <ul class="toc">
+      <li><a href="#big-picture">1. The Big Picture — How the App Works</a></li>
+      <li><a href="#file-tree">2. Full File Tree at a Glance</a></li>
+      <li><a href="#root">3. Root Files</a></li>
+      <li><a href="#server-root">4. Server — Entry Point &amp; Config</a></li>
+      <li><a href="#server-middleware">5. Server — Middleware</a></li>
+      <li><a href="#server-models">6. Server — Models (Database Schemas)</a></li>
+      <li><a href="#server-routes">7. Server — Routes (API Endpoints)</a></li>
+      <li><a href="#client-root">8. Client — Entry Point &amp; Config</a></li>
+      <li><a href="#client-src-root">9. Client — src/ Root Files</a></li>
+      <li><a href="#client-firebase">10. Client — Firebase &amp; API</a></li>
+      <li><a href="#client-context">11. Client — Auth Context</a></li>
+      <li><a href="#client-components">12. Client — Components</a></li>
+      <li><a href="#client-pages">13. Client — Pages</a></li>
+      <li><a href="#how-they-connect">14. How All the Files Connect</a></li>
+    </ul>
+  </section>
+
+  <!-- ─────────────── BIG PICTURE ─────────────── -->
+  <section id="big-picture">
+    <span class="phase-label">Overview</span>
+    <h2>1. The Big Picture — How the App Works</h2>
+
+    <p>Talent Tracker is a <strong>full-stack web application</strong> for managing job candidates and job postings. Think of it as a simple version of a hiring platform — you can add candidates, track their status (Applied → Interview → Hired), and manage job openings.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">🖥️</div>
+        <h4>Frontend (Client)</h4>
+        <p>React app the user sees in the browser — pages, buttons, tables, charts</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⚙️</div>
+        <h4>Backend (Server)</h4>
+        <p>Node.js + Express — receives API requests, talks to the database</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🗄️</div>
+        <h4>Database</h4>
+        <p>MongoDB — stores all candidate and job data permanently</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔐</div>
+        <h4>Authentication</h4>
+        <p>Firebase — handles login/logout so only authorised users can access the app</p>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <strong>Simple Analogy:</strong> Think of a restaurant.
+      The <strong>Frontend</strong> is the dining area (what customers see).
+      The <strong>Backend</strong> is the kitchen (processes requests).
+      The <strong>Database</strong> is the fridge/pantry (stores all the data).
+      <strong>Firebase</strong> is the bouncer at the door (only lets logged-in users in).
+    </div>
+  </section>
+
+  <!-- ─────────────── FILE TREE ─────────────── -->
+  <section id="file-tree">
+    <span class="phase-label">Structure</span>
+    <h2>2. Full File Tree at a Glance</h2>
+    <div class="file-tree"><span class="ft-folder">talent-tracker/</span>
+├── SETUP.md                          <span class="ft-comment">← how to set up the project</span>
+│
+├── <span class="ft-folder">server/</span>                           <span class="ft-comment">← everything that runs on the server (Node.js)</span>
+│   ├── index.js                      <span class="ft-comment">← starts the server</span>
+│   ├── package.json                  <span class="ft-comment">← server's library list</span>
+│   ├── .env                          <span class="ft-comment">← secret config values (passwords, URLs)</span>
+│   ├── .env.example                  <span class="ft-comment">← template for .env</span>
+│   │
+│   ├── <span class="ft-folder">config/</span>
+│   │   └── db.js                     <span class="ft-comment">← connects to MongoDB</span>
+│   │
+│   ├── <span class="ft-folder">middleware/</span>
+│   │   ├── authMiddleware.js         <span class="ft-comment">← checks if user is logged in</span>
+│   │   └── errorHandler.js          <span class="ft-comment">← catches and formats all errors</span>
+│   │
+│   ├── <span class="ft-folder">models/</span>
+│   │   ├── Candidate.js              <span class="ft-comment">← what a Candidate looks like in the DB</span>
+│   │   └── Job.js                    <span class="ft-comment">← what a Job looks like in the DB</span>
+│   │
+│   └── <span class="ft-folder">routes/</span>
+│       ├── candidates.js             <span class="ft-comment">← GET/POST/PUT/DELETE for candidates</span>
+│       ├── jobs.js                   <span class="ft-comment">← GET/POST/PUT/DELETE for jobs</span>
+│       └── stats.js                  <span class="ft-comment">← counts &amp; charts data for dashboard</span>
+│
+└── <span class="ft-folder">client/</span>                           <span class="ft-comment">← everything the user sees in the browser (React)</span>
+    ├── index.html                    <span class="ft-comment">← the single HTML page React loads into</span>
+    ├── vite.config.js                <span class="ft-comment">← build tool settings</span>
+    ├── eslint.config.js              <span class="ft-comment">← code quality rules</span>
+    ├── package.json                  <span class="ft-comment">← client's library list</span>
+    ├── .env                          <span class="ft-comment">← secret config values for the frontend</span>
+    ├── .env.example                  <span class="ft-comment">← template for .env</span>
+    │
+    ├── <span class="ft-folder">public/</span>
+    │   ├── favicon.svg               <span class="ft-comment">← tiny icon in browser tab</span>
+    │   └── icons.svg                 <span class="ft-comment">← reusable SVG icon set</span>
+    │
+    └── <span class="ft-folder">src/</span>                          <span class="ft-comment">← all React source code lives here</span>
+        ├── main.jsx                  <span class="ft-comment">← mounts React app into index.html</span>
+        ├── App.jsx                   <span class="ft-comment">← defines all the page routes</span>
+        ├── App.css                   <span class="ft-comment">← app-level styles</span>
+        ├── index.css                 <span class="ft-comment">← global styles (fonts, colours, dark mode)</span>
+        │
+        ├── <span class="ft-folder">api/</span>
+        │   └── axiosInstance.js      <span class="ft-comment">← pre-configured HTTP client</span>
+        │
+        ├── <span class="ft-folder">firebase/</span>
+        │   └── firebaseConfig.js     <span class="ft-comment">← connects the app to Firebase</span>
+        │
+        ├── <span class="ft-folder">contexts/</span>
+        │   └── AuthContext.jsx       <span class="ft-comment">← shares login state across all pages</span>
+        │
+        ├── <span class="ft-folder">components/</span>
+        │   ├── AppLayout.jsx         <span class="ft-comment">← sidebar + main content wrapper</span>
+        │   └── ProtectedRoute.jsx    <span class="ft-comment">← blocks pages from logged-out users</span>
+        │
+        ├── <span class="ft-folder">pages/</span>
+        │   ├── Login.jsx             <span class="ft-comment">← the login screen</span>
+        │   ├── Dashboard.jsx         <span class="ft-comment">← stats cards + charts</span>
+        │   ├── Candidates.jsx        <span class="ft-comment">← table to manage candidates</span>
+        │   └── Jobs.jsx              <span class="ft-comment">← table to manage jobs</span>
+        │
+        └── <span class="ft-folder">assets/</span>
+            ├── hero.png              <span class="ft-comment">← placeholder image</span>
+            ├── react.svg             <span class="ft-comment">← React logo</span>
+            └── vite.svg              <span class="ft-comment">← Vite logo</span></div>
+  </section>
+
+  <!-- ─────────────── ROOT ─────────────── -->
+  <section id="root">
+    <span class="phase-label">Root</span>
+    <h2>3. Root Files</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">📖</span>
+        <span class="file-path">SETUP.md</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag green">Documentation</span>
+        <p><strong>What is it?</strong> A text file with step-by-step instructions for setting up the project on a new computer.</p>
+        <p><strong>Why do we need it?</strong> When a new developer joins the team, they need to know how to configure Firebase, create <code>.env</code> files, install packages, and start the app. Without this file they'd be lost for hours.</p>
+        <div class="analogy">
+          <strong>Analogy:</strong> It's like the instruction manual that comes with flat-pack furniture — you <em>could</em> figure it out without it, but it saves a lot of time and frustration.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── SERVER ROOT ─────────────── -->
+  <section id="server-root">
+    <span class="phase-label">Server</span>
+    <h2>4. Server — Entry Point &amp; Config</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🚀</span>
+        <span class="file-path">server/index.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">Entry Point</span>
+        <p><strong>What is it?</strong> The very first file Node.js runs when you type <code>npm start</code> in the server folder. It boots up the entire backend.</p>
+        <p><strong>Why do we need it?</strong> It stitches everything together — connects to MongoDB, registers all the route files, adds security headers, and starts listening for incoming requests on port 5000.</p>
+        <pre><code>// What index.js does, step by step:
+const app = express();         // 1. Create an Express "app" (a web server)
+app.use(helmet());             // 2. Add security headers automatically
+app.use(cors());               // 3. Allow the React frontend to talk to this server
+app.use(express.json());       // 4. Allow receiving JSON in request bodies
+
+app.use('/api/candidates', candidateRoutes); // 5. Register route files
+app.use('/api/jobs',        jobRoutes);
+app.use('/api/stats',       statsRoutes);
+
+app.listen(5000, ...);         // 6. Start listening on port 5000</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> Think of this file as the manager who opens the restaurant, unlocks the door, assigns staff to their stations, and turns on the "OPEN" sign.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">📦</span>
+        <span class="file-path">server/package.json</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag amber">Config</span>
+        <p><strong>What is it?</strong> A list of every external library (npm package) the server needs to run.</p>
+        <p><strong>Why do we need it?</strong> When you run <code>npm install</code>, npm reads this file and downloads all the listed libraries automatically. Without it, you'd have to install each library by hand.</p>
+        <pre><code>// Key packages in server/package.json:
+"express"         — the web server framework
+"mongoose"        — talks to MongoDB (adds nice JS methods)
+"firebase-admin"  — verifies Firebase login tokens on the server
+"helmet"          — adds security headers to every response
+"cors"            — allows the React app to call this API
+"morgan"          — logs every incoming request (great for debugging)
+"dotenv"          — loads secret values from the .env file</code></pre>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🔑</span>
+        <span class="file-path">server/.env &nbsp; &amp; &nbsp; server/.env.example</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag red">Secret Config</span>
+        <p><strong>What is it?</strong> A file that stores sensitive values like database passwords and API keys. These values change between environments (local laptop vs. production server).</p>
+        <p><strong>Why do we need it?</strong> We never put passwords directly in code because the code goes into Git (which is public). The <code>.env</code> file is listed in <code>.gitignore</code> so it never gets uploaded.</p>
+        <pre><code># server/.env (never commit this file!)
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/talent-tracker
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."</code></pre>
+        <div class="warning">
+          <strong>Important:</strong> <code>.env.example</code> is the safe version — it shows which keys are needed but leaves the values blank. New developers copy this file, rename it to <code>.env</code>, and fill in their own values.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🗄️</span>
+        <span class="file-path">server/config/db.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag teal">Database</span>
+        <p><strong>What is it?</strong> A small file whose only job is to connect the server to MongoDB.</p>
+        <p><strong>Why do we need it?</strong> We separate the database connection into its own file so it can be imported once in <code>index.js</code> and reused. If the DB URL changes we only need to update one place.</p>
+        <pre><code>// server/config/db.js — simplified
+const connectDB = async () => {
+  const conn = await mongoose.connect(process.env.MONGO_URI);
+  console.log(`MongoDB Connected: ${conn.connection.host}`);
+};
+module.exports = connectDB;</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> This is like the water pipe connection to the restaurant kitchen. Without it, nothing works — all the cooking (data operations) needs water (the database).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── SERVER MIDDLEWARE ─────────────── -->
+  <section id="server-middleware">
+    <span class="phase-label">Server</span>
+    <h2>5. Server — Middleware</h2>
+
+    <div class="tip">
+      <strong>What is middleware?</strong> Middleware is code that runs <em>between</em> a request arriving and your route handler responding. Think of it as a series of security checks and processors a request passes through before reaching its destination.
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🔒</span>
+        <span class="file-path">server/middleware/authMiddleware.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag purple">Authentication</span>
+        <p><strong>What is it?</strong> A gatekeeper function that checks every API request to make sure the user is logged in before letting them through.</p>
+        <p><strong>Why do we need it?</strong> Without this, anyone in the world could send a request to <code>/api/candidates</code> and read or delete your data. This file checks the Firebase login token that the frontend sends with every request.</p>
+        <pre><code>// How it works (simplified):
+const protect = async (req, res, next) => {
+  // 1. Get the token from the request header: "Authorization: Bearer abc123..."
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) return res.status(401).json({ message: 'No token' });
+
+  // 2. Ask Firebase: "Is this a real, valid token?"
+  const decoded = await admin.auth().verifyIdToken(token);
+
+  // 3. If yes, attach the user info and let the request continue
+  req.user = { uid: decoded.uid, email: decoded.email };
+  next();  // ← "next" means "pass this request to the actual route handler"
+};</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> This is the bouncer at the door. Every person (request) must show a valid ID (Firebase token). No ID = no entry.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🩹</span>
+        <span class="file-path">server/middleware/errorHandler.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag red">Error Handling</span>
+        <p><strong>What is it?</strong> A central place that catches all errors from any route and sends back a clean, consistent error response.</p>
+        <p><strong>Why do we need it?</strong> Without it, every route would need its own error handling code (very repetitive). With it, any route can just call <code>next(err)</code> and this file handles the rest. It also translates MongoDB-specific errors into readable messages.</p>
+        <pre><code>// errorHandler.js — what it catches:
+
+// 1. Mongoose validation error (e.g., name field is required but missing)
+//    → returns 400 with "name: Path `name` is required"
+
+// 2. Duplicate key error (e.g., same email used twice)
+//    → returns 400 with "Duplicate value: email already exists"
+
+// 3. Invalid MongoDB ID (e.g., malformed _id in the URL)
+//    → returns 400 with "Invalid ID format"
+
+// 4. Everything else
+//    → returns 500 with the error message</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── SERVER MODELS ─────────────── -->
+  <section id="server-models">
+    <span class="phase-label">Server</span>
+    <h2>6. Server — Models (Database Schemas)</h2>
+
+    <div class="tip">
+      <strong>What is a Model/Schema?</strong> A schema defines the <em>shape</em> of your data — which fields exist, what type they are, and which ones are required. MongoDB is flexible by default, but schemas enforce structure. A Model is the JavaScript class you use to create/read/update/delete documents in that collection.
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">👤</span>
+        <span class="file-path">server/models/Candidate.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag teal">Database Schema</span>
+        <p><strong>What is it?</strong> Defines what a "Candidate" document looks like in MongoDB — what fields it has and what rules apply.</p>
+        <p><strong>Why do we need it?</strong> Without it, you could accidentally store a candidate with no name, a typo in status, or a duplicate email. The schema acts as a contract — data must match this shape or it gets rejected.</p>
+        <pre><code>// server/models/Candidate.js — what a Candidate looks like
+{
+  name:   String,   // required — must be provided
+  email:  String,   // required + unique — no two candidates can share an email
+  phone:  String,   // optional
+  status: String,   // must be one of: "Applied", "Interview", "Hired", "Rejected"
+  role:   String,   // optional — e.g. "Frontend Developer"
+
+  // Auto-added by Mongoose (timestamps: true):
+  createdAt: Date,
+  updatedAt: Date,
+}</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> Imagine a paper form with labelled boxes. The schema is the printed form template — it decides which boxes exist and which ones you must fill in.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">💼</span>
+        <span class="file-path">server/models/Job.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag teal">Database Schema</span>
+        <p><strong>What is it?</strong> Defines what a "Job" document looks like in MongoDB.</p>
+        <p><strong>Why do we need it?</strong> Same reason as Candidate — enforces data rules so no invalid job records get saved.</p>
+        <pre><code>// server/models/Job.js — what a Job looks like
+{
+  title:      String,   // required — e.g. "Senior React Developer"
+  department: String,   // optional — e.g. "Engineering"
+  location:   String,   // optional — e.g. "Remote"
+  status:     String,   // must be: "Open", "Closed", or "On Hold"
+  openings:   Number,   // how many people to hire (minimum: 1)
+
+  // Auto-added:
+  createdAt: Date,
+  updatedAt: Date,
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── SERVER ROUTES ─────────────── -->
+  <section id="server-routes">
+    <span class="phase-label">Server</span>
+    <h2>7. Server — Routes (API Endpoints)</h2>
+
+    <div class="tip">
+      <strong>What is a Route?</strong> A route is a URL path + HTTP method that the server "listens" for. When the frontend calls <code>GET /api/candidates</code>, the server runs the matching route handler function and sends back data.
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">👥</span>
+        <span class="file-path">server/routes/candidates.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">API Routes</span>
+        <p><strong>What is it?</strong> Defines the four CRUD (Create, Read, Update, Delete) operations for candidates.</p>
+        <p><strong>Why do we need it?</strong> The frontend needs a way to get candidate data, add new candidates, edit them, and delete them. Each of these actions needs its own URL endpoint. All routes are protected — only logged-in users can use them.</p>
+        <div class="table-wrap" style="margin: 10px 0;">
+          <table>
+            <thead><tr><th>Method</th><th>URL</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>GET</code></td><td><code>/api/candidates</code></td><td>Fetch all candidates (newest first)</td></tr>
+              <tr><td><code>POST</code></td><td><code>/api/candidates</code></td><td>Create a new candidate</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/api/candidates/:id</code></td><td>Update a specific candidate by ID</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/api/candidates/:id</code></td><td>Delete a specific candidate by ID</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>// Example — GET all candidates
+router.get('/', protect, async (req, res, next) => {
+  try {
+    const candidates = await Candidate.find().sort({ createdAt: -1 });
+    res.json(candidates);
+  } catch (err) {
+    next(err);  // passes the error to errorHandler.js
+  }
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">💼</span>
+        <span class="file-path">server/routes/jobs.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">API Routes</span>
+        <p><strong>What is it?</strong> Same as candidates.js but for Job documents.</p>
+        <p><strong>Why do we need it?</strong> Jobs are a completely separate data type, so they get their own route file. The pattern is identical: GET all, POST create, PUT update, DELETE remove.</p>
+        <div class="table-wrap" style="margin: 10px 0;">
+          <table>
+            <thead><tr><th>Method</th><th>URL</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>GET</code></td><td><code>/api/jobs</code></td><td>Fetch all jobs</td></tr>
+              <tr><td><code>POST</code></td><td><code>/api/jobs</code></td><td>Create a new job</td></tr>
+              <tr><td><code>PUT</code></td><td><code>/api/jobs/:id</code></td><td>Update a specific job</td></tr>
+              <tr><td><code>DELETE</code></td><td><code>/api/jobs/:id</code></td><td>Delete a specific job</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">📊</span>
+        <span class="file-path">server/routes/stats.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag purple">Aggregation</span>
+        <p><strong>What is it?</strong> A special route that runs multiple MongoDB aggregation queries to produce summary statistics for the Dashboard page.</p>
+        <p><strong>Why do we need it?</strong> The Dashboard shows cards like "Total Candidates: 45" and charts like "Applied: 20, Interview: 10, Hired: 15". This data doesn't exist as a single document — it has to be <em>calculated</em> by counting and grouping the records. That is what aggregation does.</p>
+        <pre><code>// stats.js — runs 5 queries in parallel
+const [
+  totalCandidates,   // simple count: how many candidates total?
+  totalJobs,         // simple count: how many jobs total?
+  candidatesByStatus,// group + count: {Applied: 20, Interview: 10, Hired: 15}
+  jobsByStatus,      // group + count: {Open: 8, Closed: 3, "On Hold": 2}
+  recentCandidates,  // latest 5 candidates added
+] = await Promise.all([...]);
+
+res.json({ totalCandidates, totalJobs, candidatesByStatus, jobsByStatus, recentCandidates });</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> Instead of handing you the entire employee spreadsheet, this route is like the HR manager who reads the whole spreadsheet and hands you a one-page summary report.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── CLIENT ROOT ─────────────── -->
+  <section id="client-root">
+    <span class="phase-label">Client</span>
+    <h2>8. Client — Entry Point &amp; Config</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🌐</span>
+        <span class="file-path">client/index.html</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">HTML Shell</span>
+        <p><strong>What is it?</strong> The single HTML file that the browser loads. It has almost no content — just a <code>&lt;div id="root"&gt;</code> placeholder.</p>
+        <p><strong>Why do we need it?</strong> React is a JavaScript framework — it builds the entire UI in JavaScript and injects it into this HTML div. The browser needs at least one HTML file to start; React takes over from there.</p>
+        <pre><code>&lt;!-- client/index.html — the entire "static" HTML --&gt;
+&lt;body&gt;
+  &lt;div id="root"&gt;&lt;/div&gt;  &lt;!-- React injects everything here --&gt;
+  &lt;script type="module" src="/src/main.jsx"&gt;&lt;/script&gt;
+&lt;/body&gt;</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> This is an empty canvas. React is the painter that fills it in.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">⚡</span>
+        <span class="file-path">client/vite.config.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag amber">Build Tool</span>
+        <p><strong>What is it?</strong> Configuration for Vite — the tool that compiles and bundles all your React code into files the browser can understand.</p>
+        <p><strong>Why do we need it?</strong> Browsers cannot run JSX (<code>&lt;MyComponent /&gt;</code> syntax) directly. Vite converts JSX → JavaScript, handles hot-reload during development, and bundles everything for production.</p>
+        <pre><code>// vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],  // tells Vite to process JSX and handle React HMR
+});</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> Vite is the compiler/translator. You write in JSX (a friendly language), Vite translates it into plain JavaScript that browsers understand.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🔍</span>
+        <span class="file-path">client/eslint.config.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag amber">Code Quality</span>
+        <p><strong>What is it?</strong> Rules for ESLint — a tool that automatically checks your code for common mistakes and bad patterns <em>as you type</em>.</p>
+        <p><strong>Why do we need it?</strong> It catches bugs before you even run the code. For example, it warns you if you declare a variable but never use it, or if you forget a dependency in a React <code>useEffect</code>.</p>
+        <pre><code>// Examples of what ESLint catches:
+// ❌ "react-hooks/exhaustive-deps" — warns if useEffect is missing a dependency
+// ❌ "no-unused-vars" — warns about variables you declared but never used</code></pre>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🔑</span>
+        <span class="file-path">client/.env &nbsp; &amp; &nbsp; client/.env.example</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag red">Secret Config</span>
+        <p><strong>What is it?</strong> Same idea as the server <code>.env</code> — stores Firebase credentials and the backend API URL so they aren't hardcoded in the source.</p>
+        <p><strong>Why do we need it?</strong> Firebase API keys change between projects. The backend URL changes between localhost and production. By putting these in <code>.env</code>, the code works in any environment without changes.</p>
+        <pre><code># client/.env
+VITE_API_URL=http://localhost:5000
+VITE_FIREBASE_API_KEY=AIzaSy...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project
+VITE_FIREBASE_APP_ID=1:123456:web:abc</code></pre>
+        <div class="warning">
+          <strong>Note:</strong> In Vite, env variables must be prefixed with <code>VITE_</code> to be accessible in the browser. Variables without this prefix are hidden from client code for security.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🖼️</span>
+        <span class="file-path">client/public/favicon.svg &nbsp; &amp; &nbsp; icons.svg</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag pink">Assets</span>
+        <p><strong>What is favicon.svg?</strong> The tiny icon shown in the browser tab next to the page title.</p>
+        <p><strong>What is icons.svg?</strong> A collection of reusable SVG icons (like a sprite sheet). Instead of many separate icon files, all icons live in one file and are referenced by ID.</p>
+        <p><strong>Why are these in <code>public/</code>?</strong> Files in <code>public/</code> are served as-is (not processed by Vite). They can be accessed directly via URL: <code>/favicon.svg</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── CLIENT SRC ROOT ─────────────── -->
+  <section id="client-src-root">
+    <span class="phase-label">Client</span>
+    <h2>9. Client — src/ Root Files</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🎬</span>
+        <span class="file-path">client/src/main.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">React Entry Point</span>
+        <p><strong>What is it?</strong> The first React file that runs. Its only job is to mount the React app into the <code>&lt;div id="root"&gt;</code> in <code>index.html</code>.</p>
+        <p><strong>Why do we need it?</strong> React needs a starting point — a place where it "takes over" from HTML. This file also imports global CSS files.</p>
+        <pre><code>// client/src/main.jsx
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import 'ag-grid-community/styles/ag-grid.css';      // AG Grid base styles
+import 'ag-grid-community/styles/ag-theme-quartz.css'; // AG Grid theme
+import App from './App.jsx';
+
+createRoot(document.getElementById('root')).render(
+  &lt;StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/StrictMode&gt;
+);</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> If <code>index.html</code> is the stage and React is the show, <code>main.jsx</code> is the stage manager who says "lights up, curtain open!"
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🗺️</span>
+        <span class="file-path">client/src/App.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">Router &amp; App Shell</span>
+        <p><strong>What is it?</strong> The top-level React component. It sets up routing (which URL shows which page) and wraps the whole app in providers (theme, auth).</p>
+        <p><strong>Why do we need it?</strong> Without a router, the app would only ever show one page. <code>App.jsx</code> maps each URL path to a page component. It also handles dark mode state and wraps everything in Ant Design's <code>ConfigProvider</code>.</p>
+        <pre><code>// client/src/App.jsx — the route map
+&lt;Routes&gt;
+  &lt;Route path="/login" element={&lt;Login /&gt;} /&gt;
+
+  &lt;!-- ProtectedRoute blocks access if not logged in --&gt;
+  &lt;Route path="/" element={&lt;ProtectedRoute&gt;&lt;AppLayout /&gt;&lt;/ProtectedRoute&gt;}&gt;
+    &lt;Route path="dashboard"  element={&lt;Dashboard /&gt;} /&gt;
+    &lt;Route path="candidates" element={&lt;Candidates /&gt;} /&gt;
+    &lt;Route path="jobs"       element={&lt;Jobs /&gt;} /&gt;
+  &lt;/Route&gt;
+
+  &lt;Route path="*" element={&lt;Navigate to="/dashboard" /&gt;} /&gt;
+&lt;/Routes&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🎨</span>
+        <span class="file-path">client/src/index.css &nbsp; &amp; &nbsp; App.css</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag pink">Styles</span>
+        <p><strong>What is index.css?</strong> Global styles that apply to the entire app — font settings, colour variables, base resets, and dark mode support.</p>
+        <p><strong>What is App.css?</strong> Template CSS leftover from the Vite starter. It is not actively used in the project.</p>
+        <p><strong>Why do we need index.css?</strong> It defines CSS custom properties (variables) like <code>--primary-color</code> once, so all components can reuse them. It also handles dark mode with a media query.</p>
+        <pre><code>/* index.css — CSS variables shared across the whole app */
+:root {
+  --primary-color: #0f3460;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", ...;
+}
+@media (prefers-color-scheme: dark) {
+  /* dark mode overrides */
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── FIREBASE + API ─────────────── -->
+  <section id="client-firebase">
+    <span class="phase-label">Client</span>
+    <h2>10. Client — Firebase &amp; API</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🔥</span>
+        <span class="file-path">client/src/firebase/firebaseConfig.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag purple">Firebase</span>
+        <p><strong>What is it?</strong> Initialises the Firebase SDK using credentials from <code>.env</code>. Exports the <code>auth</code> object used for login/logout.</p>
+        <p><strong>Why do we need it?</strong> Firebase needs to be initialised once before any auth operations can happen. By doing it here and exporting <code>auth</code>, every other file can import it without re-initialising.</p>
+        <pre><code>// client/src/firebase/firebaseConfig.js
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+
+const firebaseConfig = {
+  apiKey:    import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:  import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  appId:      import.meta.env.VITE_FIREBASE_APP_ID,
+};
+
+const app  = initializeApp(firebaseConfig);
+export const auth = getAuth(app);</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> This is like plugging in the security system — you do it once at the start, and then every door in the building can use it.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">📡</span>
+        <span class="file-path">client/src/api/axiosInstance.js</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag teal">HTTP Client</span>
+        <p><strong>What is it?</strong> A pre-configured version of Axios (the library used for HTTP requests). It automatically adds the Firebase login token to every API request.</p>
+        <p><strong>Why do we need it?</strong> Every API request to the server must include an <code>Authorization: Bearer &lt;token&gt;</code> header — that is how the server knows you are logged in. Without this file, every page (<code>Candidates.jsx</code>, <code>Jobs.jsx</code>, etc.) would have to manually fetch the token and add the header. This file does it once for everyone.</p>
+        <pre><code>// axiosInstance.js — what happens on every API request
+axiosInstance.interceptors.request.use(async (config) => {
+  const user = auth.currentUser;
+  if (user) {
+    const token = await user.getIdToken();  // get fresh Firebase token
+    config.headers.Authorization = `Bearer ${token}`;  // attach it
+  }
+  return config;
+});
+
+// What happens on a 401 (token expired):
+axiosInstance.interceptors.response.use(null, async (error) => {
+  if (error.response?.status === 401) {
+    await signOut(auth);   // log the user out
+    window.location.href = '/login';  // redirect to login page
+  }
+});</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> Imagine every staff member needs to show their ID badge when entering the kitchen. Instead of each person remembering to clip on their badge, there's a turnstile that automatically reads and attaches their badge every time.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── AUTH CONTEXT ─────────────── -->
+  <section id="client-context">
+    <span class="phase-label">Client</span>
+    <h2>11. Client — Auth Context</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🌍</span>
+        <span class="file-path">client/src/contexts/AuthContext.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag purple">State Management</span>
+        <p><strong>What is it?</strong> A React Context that holds the current logged-in user and shares it with every component in the app. Also provides <code>login()</code> and <code>logout()</code> functions.</p>
+        <p><strong>Why do we need it?</strong> Without context, if <code>AppLayout.jsx</code> needs to know the user's email (to show it in the sidebar), it would need the user passed down as a prop through multiple layers. Context makes the user data available everywhere without "prop drilling".</p>
+        <pre><code>// How it works — simplified
+const AuthContext = createContext();
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);  // null = not logged in
+
+  useEffect(() => {
+    // Firebase fires this whenever login state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);  // update state automatically
+    });
+    return unsubscribe;  // cleanup on unmount
+  }, []);
+
+  const login  = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  const logout = () => signOut(auth);
+
+  return &lt;AuthContext.Provider value={{ user, login, logout }}&gt;{children}&lt;/AuthContext.Provider&gt;;
+}
+
+// Any component can now do:
+const { user, logout } = useAuth();</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> Context is like a company-wide announcement board. Instead of one person walking around telling everyone the news, it's posted centrally and anyone who needs it can look it up.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── COMPONENTS ─────────────── -->
+  <section id="client-components">
+    <span class="phase-label">Client</span>
+    <h2>12. Client — Components</h2>
+
+    <div class="tip">
+      <strong>What is a component?</strong> A component is a reusable piece of UI — a React function that returns HTML-like JSX. Components are the building blocks of any React app.
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🏗️</span>
+        <span class="file-path">client/src/components/AppLayout.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">Layout</span>
+        <p><strong>What is it?</strong> The main shell of the app — it wraps every protected page with a collapsible sidebar (navigation menu) on the left and a content area on the right.</p>
+        <p><strong>Why do we need it?</strong> Every page (Dashboard, Candidates, Jobs) needs the same sidebar. Instead of repeating the sidebar code in every page, <code>AppLayout</code> defines it once and uses <code>&lt;Outlet /&gt;</code> to render whichever page is currently active.</p>
+        <pre><code>// AppLayout.jsx — structure
+&lt;Layout&gt;
+  &lt;Sider&gt;  {/* Left sidebar */}
+    &lt;Logo /&gt;
+    &lt;Menu items={[Dashboard, Candidates, Jobs]} /&gt;
+    &lt;UserDropdown /&gt;  {/* logout, dark mode toggle */}
+  &lt;/Sider&gt;
+
+  &lt;Content&gt;
+    &lt;Outlet /&gt;  {/* ← Dashboard / Candidates / Jobs renders here */}
+  &lt;/Content&gt;
+&lt;/Layout&gt;</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> AppLayout is the picture frame. Pages are the pictures inside it. The frame (sidebar, header) stays the same; only the picture (page content) swaps out.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🛡️</span>
+        <span class="file-path">client/src/components/ProtectedRoute.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag purple">Route Guard</span>
+        <p><strong>What is it?</strong> A wrapper component that checks if the user is logged in. If yes, it shows the wrapped page. If no, it redirects to <code>/login</code>.</p>
+        <p><strong>Why do we need it?</strong> Without this, anyone could type <code>/candidates</code> in the browser address bar and see all your data without logging in. This component acts as a gate.</p>
+        <pre><code>// ProtectedRoute.jsx — simplified
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return &lt;Spinner /&gt;;  // wait while Firebase checks login state
+
+  if (!user) return &lt;Navigate to="/login" /&gt;;  // not logged in → go to login
+
+  return children;  // logged in → show the protected page
+}</code></pre>
+        <div class="analogy">
+          <strong>Analogy:</strong> This is the lock on a private room. The key is being logged in. Without the key, the door sends you back to reception (login page).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── PAGES ─────────────── -->
+  <section id="client-pages">
+    <span class="phase-label">Client</span>
+    <h2>13. Client — Pages</h2>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">🔐</span>
+        <span class="file-path">client/src/pages/Login.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag purple">Page</span>
+        <p><strong>What is it?</strong> The login screen — email + password fields, submit button, and error messages.</p>
+        <p><strong>Why do we need it?</strong> It is the entry point for every user. On successful login, it navigates to <code>/dashboard</code>. It maps Firebase error codes (like <code>auth/wrong-password</code>) to user-friendly messages.</p>
+        <pre><code>// Login.jsx — key logic
+const handleSubmit = async (values) => {
+  try {
+    await login(values.email, values.password);  // from AuthContext
+    navigate('/dashboard');
+  } catch (err) {
+    // Map Firebase error codes → readable messages
+    const messages = {
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/user-not-found': 'No account with that email.',
+    };
+    setError(messages[err.code] || 'Login failed.');
+  }
+};</code></pre>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">📊</span>
+        <span class="file-path">client/src/pages/Dashboard.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">Page</span>
+        <p><strong>What is it?</strong> The home screen after login. Displays summary stat cards, bar charts, and pie charts.</p>
+        <p><strong>Why do we need it?</strong> Managers need a quick overview — total candidates, hiring funnel status, open jobs — without browsing every record. The charts (built with Recharts) make trends visible at a glance. Clicking a stat card opens a detailed AG Grid table in a modal.</p>
+        <pre><code>// Dashboard.jsx — what it fetches
+useEffect(() => {
+  axiosInstance.get('/api/stats').then(({ data }) => {
+    setStats(data);
+    // data = { totalCandidates, totalJobs, candidatesByStatus, jobsByStatus, recentCandidates }
+  });
+}, []);</code></pre>
+        <div class="tip">
+          <strong>Libraries used:</strong>
+          <strong>Recharts</strong> — for bar and pie charts.
+          <strong>AG Grid</strong> — for the detailed data table inside the modal.
+          <strong>Ant Design</strong> — for the card and modal UI components.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">👥</span>
+        <span class="file-path">client/src/pages/Candidates.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">Page</span>
+        <p><strong>What is it?</strong> A full CRUD page for managing candidates. Shows an AG Grid table with all candidates and has Add / Edit / Delete actions.</p>
+        <p><strong>Why do we need it?</strong> Recruiters need to add new candidates, update their status as they move through the hiring process, and remove ones who are no longer relevant.</p>
+        <pre><code>// What Candidates.jsx does:
+// 1. On load: GET /api/candidates → display in AG Grid table
+// 2. "Add" button → open modal with empty form → POST /api/candidates
+// 3. "Edit" button → open modal pre-filled → PUT /api/candidates/:id
+// 4. "Delete" button → confirm dialog → DELETE /api/candidates/:id
+// 5. After every change: re-fetch the list</code></pre>
+        <div class="tip">
+          <strong>AG Grid</strong> is used here instead of a plain HTML table because it handles large datasets efficiently (virtual scrolling), has built-in sorting/filtering, and looks professional with minimal code.
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="file-card-header">
+        <span class="file-icon">💼</span>
+        <span class="file-path">client/src/pages/Jobs.jsx</span>
+      </div>
+      <div class="file-card-body">
+        <span class="why-tag">Page</span>
+        <p><strong>What is it?</strong> A full CRUD page for managing job postings. Same pattern as <code>Candidates.jsx</code>.</p>
+        <p><strong>Why do we need it?</strong> Hiring managers need to post open roles, track how many people to hire (<code>openings</code> field), close roles once filled, and put them on hold when budgets are frozen.</p>
+        <pre><code>// Jobs.jsx columns in the AG Grid table:
+// Title | Department | Location | Status (colour tag) | Openings | Edit | Delete</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── HOW THEY CONNECT ─────────────── -->
+  <section id="how-they-connect">
+    <span class="phase-label">Summary</span>
+    <h2>14. How All the Files Connect</h2>
+
+    <p>Here is the full journey of what happens when a logged-in user opens the Candidates page:</p>
+
+    <ul class="flow">
+      <li><span class="arrow">1</span> User visits <code>/candidates</code> in the browser</li>
+      <li><span class="arrow">2</span> React Router (in <code>App.jsx</code>) matches the path</li>
+      <li><span class="arrow">3</span> <code>ProtectedRoute.jsx</code> checks <code>AuthContext</code> — user is logged in, so it proceeds</li>
+      <li><span class="arrow">4</span> <code>AppLayout.jsx</code> renders the sidebar; <code>Candidates.jsx</code> renders in the content area</li>
+      <li><span class="arrow">5</span> <code>Candidates.jsx</code> calls <code>axiosInstance.get('/api/candidates')</code></li>
+      <li><span class="arrow">6</span> <code>axiosInstance.js</code> fetches the Firebase token and adds it to the request header</li>
+      <li><span class="arrow">7</span> Request arrives at the Express server (<code>server/index.js</code>)</li>
+      <li><span class="arrow">8</span> <code>authMiddleware.js</code> verifies the token with Firebase Admin SDK</li>
+      <li><span class="arrow">9</span> <code>routes/candidates.js</code> runs <code>Candidate.find()</code></li>
+      <li><span class="arrow">10</span> Mongoose queries MongoDB using the schema from <code>models/Candidate.js</code></li>
+      <li><span class="arrow">11</span> Data flows back: MongoDB → Mongoose → Route → Express → Axios → <code>Candidates.jsx</code></li>
+      <li><span class="arrow">12</span> AG Grid renders the candidate table with the returned data</li>
+    </ul>
+
+    <div class="analogy">
+      <strong>The whole system in one sentence:</strong> The <em>pages</em> ask for data, <em>axiosInstance</em> attaches the security badge, the <em>server routes</em> verify the badge and query the <em>database</em>, and the data flows back to fill the <em>table</em> on screen.
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

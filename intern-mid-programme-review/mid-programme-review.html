@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mid-Programme Review — Search UI Demo (Talent Tracker)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header p  { margin-top: 8px; font-size: 1rem; opacity: 0.8; }
+    header .meta { margin-top: 16px; font-size: 0.85rem; opacity: 0.7; }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    main { max-width: 980px; margin: 40px auto; padding: 0 24px 60px; }
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8edf5;
+    }
+
+    h3 { font-size: 1rem; font-weight: 600; color: #16213e; margin: 22px 0 10px; }
+    h4 { font-size: 0.92rem; font-weight: 600; color: #334155; margin: 16px 0 8px; }
+    p  { margin-bottom: 10px; }
+
+    pre {
+      background: #1e2a3a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 12px 0;
+      white-space: pre;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.85em;
+      background: #eef2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0f3460;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    .table-wrap { overflow-x: auto; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #0f3460; color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; }
+    td { padding: 9px 14px; border-bottom: 1px solid #e8edf5; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8f9fc; }
+    td code { font-size: 0.82em; }
+
+    .tip {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .tip strong { color: #15803d; }
+
+    .warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .warning strong { color: #b45309; }
+
+    .analogy {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .analogy strong { color: #1d4ed8; }
+
+    .feedback-box {
+      background: #fdf4ff;
+      border-left: 4px solid #a855f7;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .feedback-box strong { color: #7e22ce; }
+
+    .phase-label {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .phase-label.green  { background: #15803d; }
+    .phase-label.amber  { background: #b45309; }
+    .phase-label.purple { background: #7e22ce; }
+    .phase-label.red    { background: #b91c1c; }
+
+    .toc { list-style: none; padding-left: 0; }
+    .toc li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .toc a  { color: #0f3460; text-decoration: none; font-size: 0.9rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .score-card {
+      background: #f8f9fc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .score-card .score {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0f3460;
+      line-height: 1;
+    }
+    .score-card .label {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .steps { counter-reset: step; padding-left: 0; list-style: none; }
+    .steps li {
+      counter-increment: step;
+      padding: 14px 16px 14px 56px;
+      position: relative;
+      border-left: 3px solid #e8edf5;
+      margin-bottom: 10px;
+      border-radius: 0 8px 8px 0;
+      background: #f8f9fc;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 14px; top: 14px;
+      background: #0f3460;
+      color: #fff;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    ul.bullets { padding-left: 22px; margin: 8px 0 12px; }
+    ul.bullets li { margin-bottom: 6px; font-size: 0.9rem; }
+
+    .inline-diff { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+    .diff-block  { flex: 1; min-width: 260px; }
+    .diff-block .diff-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .diff-block.before .diff-label { color: #b91c1c; }
+    .diff-block.after  .diff-label { color: #15803d; }
+
+    .highlight-yellow { background: #fef9c3; padding: 2px 5px; border-radius: 3px; }
+    .highlight-green  { background: #dcfce7; padding: 2px 5px; border-radius: 3px; }
+    .highlight-blue   { background: #dbeafe; padding: 2px 5px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mid-Programme Review</h1>
+  <p>Code review, performance notes &amp; learning goals for the Search UI Demo server — Talent Tracker</p>
+  <div class="meta">Presenter: Team Lead &nbsp;|&nbsp; Intern: Aruna &nbsp;|&nbsp; Date: April 2026</div>
+  <div class="badge-row">
+    <span class="badge">Express.js</span>
+    <span class="badge">MongoDB $facet</span>
+    <span class="badge">Jest + Supertest</span>
+    <span class="badge">Query Tuning</span>
+    <span class="badge">Index Mapping</span>
+    <span class="badge">REST API Docs</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ─────────────── TABLE OF CONTENTS ─────────────── -->
+  <section id="toc">
+    <h2>Table of Contents</h2>
+    <ul class="toc">
+      <li><a href="#progress">1. Mid-Programme Progress Snapshot</a></li>
+      <li><a href="#query-tuning">2. Performance Review — Query Tuning</a></li>
+      <li><a href="#index-mapping">3. Performance Review — Index Mapping Optimisation</a></li>
+      <li><a href="#unit-tests">4. Writing Unit Tests for API Routes (Jest)</a></li>
+      <li><a href="#api-docs">5. API Endpoint Documentation (curl Examples)</a></li>
+      <li><a href="#feedback">6. Code Review &amp; Personal Feedback — Aruna</a></li>
+    </ul>
+  </section>
+
+  <!-- ─────────────── PROGRESS SNAPSHOT ─────────────── -->
+  <section id="progress">
+    <span class="phase-label">Overview</span>
+    <h2>1. Mid-Programme Progress Snapshot</h2>
+
+    <p>We are at roughly the halfway point of the internship. Here is a quick snapshot of where Aruna stands across four dimensions before we dig into the technical detail.</p>
+
+    <div class="score-grid">
+      <div class="score-card">
+        <div class="score">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
+        <div class="label">Code Quality</div>
+      </div>
+      <div class="score-card">
+        <div class="score">&#9733;&#9733;&#9733;&#9734;&#9734;</div>
+        <div class="label">Performance Awareness</div>
+      </div>
+      <div class="score-card">
+        <div class="score">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
+        <div class="label">Communication</div>
+      </div>
+      <div class="score-card">
+        <div class="score">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
+        <div class="label">Initiative</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Overall:</strong> Great start — the core feature works end-to-end and the code is readable. The focus for the second half is <em>performance</em> (indexes, query shape) and <em>test coverage</em>.
+    </div>
+  </section>
+
+  <!-- ─────────────── QUERY TUNING ─────────────── -->
+  <section id="query-tuning">
+    <span class="phase-label amber">Performance</span>
+    <h2>2. Performance Review — Query Tuning</h2>
+
+    <h3>The Problem: Regex on Unindexed Fields</h3>
+    <p>The current free-text search in <code>GET /api/candidates</code> uses a <code>$regex</code> across five fields. On a small seed dataset this is invisible, but it does a <strong>full collection scan</strong> on every request — MongoDB cannot use any index for a leading-wildcard regex.</p>
+
+    <pre><code>// Current code — index.js line 57-64
+// ❌ Five separate $regex expressions — full collection scan every time
+const textMatch = q.trim()
+  ? {
+      $or: [
+        { name:     { $regex: q, $options: 'i' } },
+        { bio:      { $regex: q, $options: 'i' } },
+        { skills:   { $regex: q, $options: 'i' } },
+        { location: { $regex: q, $options: 'i' } },
+        { role:     { $regex: q, $options: 'i' } },
+      ],
+    }
+  : {};</code></pre>
+
+    <div class="warning">
+      <strong>Why this hurts at scale:</strong> With 100,000 candidates every search reads every document in the collection — O(n). Response times go from ~5 ms (100 docs) to ~4 s (100 k docs) with no code change.
+    </div>
+
+    <h3>Fix 1 — MongoDB Atlas Search (recommended for production)</h3>
+    <p>If you use MongoDB Atlas, replace the <code>$regex</code> with a <code>$search</code> stage. Atlas maintains a Lucene index — same technology as Elasticsearch.</p>
+    <pre><code>// ✅ Atlas full-text search (replace textMatch block)
+const textMatch = q.trim()
+  ? { $text: { $search: q } }   // requires a text index — see section 3
+  : {};</code></pre>
+
+    <h3>Fix 2 — MongoDB text index (self-hosted / local)</h3>
+    <p>Create a compound text index once (see section 3). Then replace all five <code>$regex</code> expressions with a single <code>$text</code> operator. MongoDB scores each document and only touches the index, not the full documents.</p>
+
+    <pre><code>// ✅ Single $text operator — uses the text index created in section 3
+const textMatch = q.trim()
+  ? { $text: { $search: q } }
+  : {};</code></pre>
+
+    <h3>Fix 3 — Filter-field indexes (skills, location, status)</h3>
+    <p>The <code>$match</code> inside the <code>$facet</code> pipeline also runs without an index. Each filter field should have its own index.</p>
+
+    <pre><code>// Run once in mongo shell or a migration script
+db.candidates.createIndex({ skills: 1 });
+db.candidates.createIndex({ location: 1 });
+db.candidates.createIndex({ status: 1 });</code></pre>
+
+    <div class="analogy">
+      <strong>Analogy for interns:</strong> Imagine a library with no catalogue. A full-collection-scan is a librarian who reads every book title to find the one you want. An index is the catalogue — the librarian goes straight to the shelf.
+    </div>
+
+    <h3>How to Verify the Fix with <code>explain()</code></h3>
+    <pre><code>// In Mongosh — check the winning plan before and after adding indexes
+db.candidates.find({ $text: { $search: "React" } }).explain("executionStats")
+
+// Look for:
+//   "winningPlan.stage": "TEXT"   ← good — using text index
+//   "winningPlan.stage": "COLLSCAN" ← bad — full scan, add the index</code></pre>
+  </section>
+
+  <!-- ─────────────── INDEX MAPPING ─────────────── -->
+  <section id="index-mapping">
+    <span class="phase-label amber">Performance</span>
+    <h2>3. Index Mapping Optimisation</h2>
+
+    <h3>Current State — No Explicit Indexes</h3>
+    <p>The <code>Candidate</code> Mongoose schema has no index declarations beyond the default <code>_id</code>. Every sort, filter, and text-search stage does a collection scan.</p>
+
+    <h3>Recommended Index Strategy</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Type</th>
+            <th>Used by</th>
+            <th>Why needed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>{ name, bio, skills, location, role }</code></td>
+            <td>Text (compound)</td>
+            <td><code>GET ?q=</code> free-text</td>
+            <td>Replaces 5 regex scans with one scored lookup</td>
+          </tr>
+          <tr>
+            <td><code>{ skills: 1 }</code></td>
+            <td>Multikey</td>
+            <td><code>GET ?skills=</code> filter</td>
+            <td>Skills is an array — MongoDB builds a multikey index automatically</td>
+          </tr>
+          <tr>
+            <td><code>{ location: 1 }</code></td>
+            <td>Single-field</td>
+            <td><code>GET ?locations=</code> filter</td>
+            <td>Equality match on location facet</td>
+          </tr>
+          <tr>
+            <td><code>{ status: 1 }</code></td>
+            <td>Single-field</td>
+            <td><code>GET ?statuses=</code> filter</td>
+            <td>Low cardinality — still worth indexing for large collections</td>
+          </tr>
+          <tr>
+            <td><code>{ experience_years: -1 }</code></td>
+            <td>Single-field</td>
+            <td><code>GET ?sort=exp_desc</code></td>
+            <td>Without this, the sort stage buffers all documents in memory</td>
+          </tr>
+          <tr>
+            <td><code>{ email: 1 }</code></td>
+            <td>Unique sparse</td>
+            <td><code>POST /api/candidates</code></td>
+            <td>Prevents duplicate email entries at the DB layer</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Adding Indexes in the Mongoose Schema</h3>
+    <p>The best place to declare indexes is in <code>models/Candidate.js</code> — they are created automatically when the app connects for the first time.</p>
+
+    <pre><code>// models/Candidate.js — optimised version
+const mongoose = require('mongoose');
+
+const candidateSchema = new mongoose.Schema(
+  {
+    name:             { type: String, required: true, trim: true },
+    email:            { type: String, trim: true, lowercase: true },
+    phone:            { type: String, trim: true },
+    role:             { type: String, trim: true },
+    status:           {
+      type: String,
+      enum: ['Applied', 'Interview', 'Hired', 'Rejected'],
+      default: 'Applied',
+      index: true,           // ← single-field index
+    },
+    skills:           [{ type: String, trim: true }],   // multikey index below
+    location:         { type: String, trim: true, index: true },
+    experience_years: { type: Number, default: 0 },
+    bio:              { type: String, trim: true },
+    applied_at:       { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+// Compound text index — covers all free-text search fields
+candidateSchema.index(
+  { name: 'text', bio: 'text', skills: 'text', location: 'text', role: 'text' },
+  { weights: { name: 10, skills: 5, role: 5, bio: 2, location: 1 } }
+);
+
+// Multikey index on skills array (for facet filter)
+candidateSchema.index({ skills: 1 });
+
+// Sort support
+candidateSchema.index({ experience_years: -1 });
+
+// Unique email (sparse = allows multiple null/missing emails)
+candidateSchema.index({ email: 1 }, { unique: true, sparse: true });
+
+module.exports = mongoose.model('Candidate', candidateSchema);</code></pre>
+
+    <div class="tip">
+      <strong>Weight tip:</strong> The text index weights mean a match in <code>name</code> scores 10× higher than a match in <code>location</code>. This gives more intuitive search ranking with zero extra code.
+    </div>
+
+    <div class="warning">
+      <strong>Watch out:</strong> MongoDB only allows <strong>one text index per collection</strong>. If you call <code>createIndex</code> twice with different text fields you will get an error. Declare all text fields in one compound text index.
+    </div>
+  </section>
+
+  <!-- ─────────────── UNIT TESTS ─────────────── -->
+  <section id="unit-tests">
+    <span class="phase-label">Testing</span>
+    <h2>4. Writing Unit Tests for API Routes (Jest)</h2>
+
+    <h3>Setup</h3>
+    <p>We use <strong>Jest</strong> as the test runner and <strong>Supertest</strong> to make real HTTP calls against the Express app without starting a server. <strong>mongodb-memory-server</strong> spins up an in-memory MongoDB so tests are fast and isolated.</p>
+
+    <pre><code># Install test dependencies (run from /server)
+npm install --save-dev jest supertest mongodb-memory-server @types/jest</code></pre>
+
+    <p>Add the following to <code>package.json</code>:</p>
+    <pre><code>{
+  "scripts": {
+    "test": "jest --runInBand --forceExit"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/__tests__/**/*.test.js"]
+  }
+}</code></pre>
+
+    <h3>Test File — <code>__tests__/candidates.test.js</code></h3>
+    <pre><code>/**
+ * __tests__/candidates.test.js
+ * Unit tests for GET /api/candidates and POST /api/candidates
+ */
+
+const request  = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+// We import the app but NOT the listen() call — supertest handles the port
+let app;
+let mongod;
+
+// ── Lifecycle ────────────────────────────────────────────────────────────────
+beforeAll(async () => {
+  mongod = await MongoMemoryServer.create();
+  const uri = mongod.getUri();
+
+  // Override the connection string before requiring the app
+  process.env.MONGO_URI = uri;
+
+  // Require app after env is set so it connects to in-memory DB
+  app = require('../app');   // NOTE: you need to split app.js from index.js (see below)
+  await mongoose.connect(uri);
+});
+
+afterEach(async () => {
+  // Clear all collections between tests so tests don't bleed into each other
+  const collections = mongoose.connection.collections;
+  for (const key in collections) {
+    await collections[key].deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongod.stop();
+});
+
+// ── Helper: seed a candidate ──────────────────────────────────────────────────
+const seed = (overrides = {}) =>
+  request(app)
+    .post('/api/candidates')
+    .send({
+      name:             'Alice Example',
+      email:            'alice@example.com',
+      role:             'Frontend Developer',
+      status:           'Applied',
+      location:         'Austin',
+      experience_years: 3,
+      skills:           ['React', 'TypeScript'],
+      bio:              'Passionate frontend developer',
+      ...overrides,
+    });
+
+// ════════════════════════════════════════════════════════════════════════════
+// POST /api/candidates
+// ════════════════════════════════════════════════════════════════════════════
+describe('POST /api/candidates', () => {
+
+  test('creates a candidate and returns 201 with the new document', async () => {
+    const res = await seed();
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toMatchObject({
+      name:     'Alice Example',
+      email:    'alice@example.com',
+      status:   'Applied',
+      location: 'Austin',
+    });
+    expect(res.body._id).toBeDefined();
+  });
+
+  test('returns 400 when name is missing (required field)', async () => {
+    const res = await request(app)
+      .post('/api/candidates')
+      .send({ email: 'no-name@example.com', role: 'Designer' });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toMatch(/name/i);
+  });
+
+  test('rejects an invalid status value', async () => {
+    const res = await seed({ status: 'Ghosted' });   // not in enum
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBeDefined();
+  });
+
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// GET /api/candidates
+// ════════════════════════════════════════════════════════════════════════════
+describe('GET /api/candidates', () => {
+
+  beforeEach(async () => {
+    // Seed three candidates before each GET test
+    await seed({ name: 'Alice React Dev',    skills: ['React', 'CSS'],      location: 'Austin',  status: 'Applied',   experience_years: 2 });
+    await seed({ name: 'Bob Node Engineer',  skills: ['Node.js', 'Express'],location: 'Seattle', status: 'Interview', experience_years: 5, email: 'bob@example.com' });
+    await seed({ name: 'Carol Full Stack',   skills: ['React', 'Node.js'],  location: 'Austin',  status: 'Hired',     experience_years: 8, email: 'carol@example.com' });
+  });
+
+  test('returns all candidates when no query params are given', async () => {
+    const res = await request(app).get('/api/candidates');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.total).toBe(3);
+    expect(res.body.results).toHaveLength(3);
+  });
+
+  test('filters by skill', async () => {
+    const res = await request(app).get('/api/candidates?skills=React');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.total).toBe(2);   // Alice + Carol have React
+    res.body.results.forEach(c => expect(c.skills).toContain('React'));
+  });
+
+  test('filters by location', async () => {
+    const res = await request(app).get('/api/candidates?locations=Seattle');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.total).toBe(1);
+    expect(res.body.results[0].name).toBe('Bob Node Engineer');
+  });
+
+  test('filters by status', async () => {
+    const res = await request(app).get('/api/candidates?statuses=Hired');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.total).toBe(1);
+    expect(res.body.results[0].name).toBe('Carol Full Stack');
+  });
+
+  test('combines multiple filters (AND logic)', async () => {
+    const res = await request(app).get('/api/candidates?skills=React&locations=Austin');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.total).toBe(2);   // Alice + Carol are in Austin with React
+  });
+
+  test('sorts by experience descending', async () => {
+    const res = await request(app).get('/api/candidates?sort=exp_desc');
+
+    expect(res.statusCode).toBe(200);
+    const years = res.body.results.map(c => c.experience_years);
+    expect(years).toEqual([...years].sort((a, b) => b - a));
+  });
+
+  test('sorts by name ascending', async () => {
+    const res = await request(app).get('/api/candidates?sort=name_asc');
+
+    expect(res.statusCode).toBe(200);
+    const names = res.body.results.map(c => c.name);
+    expect(names).toEqual([...names].sort());
+  });
+
+  test('returns facets with correct counts', async () => {
+    const res = await request(app).get('/api/candidates');
+
+    expect(res.statusCode).toBe(200);
+    const { facets } = res.body;
+
+    // skills facet — React appears in 2 documents
+    const reactFacet = facets.skills.find(f => f.value === 'React');
+    expect(reactFacet).toBeDefined();
+    expect(reactFacet.count).toBe(2);
+
+    // locations facet
+    const austinFacet = facets.locations.find(f => f.value === 'Austin');
+    expect(austinFacet.count).toBe(2);
+  });
+
+  test('facet counts stay stable when a filter is applied', async () => {
+    // Filter by Seattle — facets should still show all 3 candidates' skills
+    const filtered = await request(app).get('/api/candidates?locations=Seattle');
+    const all      = await request(app).get('/api/candidates');
+
+    expect(filtered.body.facets.skills).toEqual(all.body.facets.skills);
+  });
+
+  test('text search ?q= narrows results', async () => {
+    const res = await request(app).get('/api/candidates?q=Node');
+
+    expect(res.statusCode).toBe(200);
+    // Bob and Carol both have Node.js in their skills / name
+    expect(res.body.total).toBeGreaterThanOrEqual(1);
+  });
+
+  test('returns empty results for a query that matches nothing', async () => {
+    const res = await request(app).get('/api/candidates?q=xyzzy123notaword');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.total).toBe(0);
+    expect(res.body.results).toHaveLength(0);
+  });
+
+});</code></pre>
+
+    <div class="tip">
+      <strong>Important — split app.js from index.js:</strong> Supertest needs to import the Express <code>app</code> object <em>without</em> calling <code>app.listen()</code>. Create a thin <code>app.js</code> that exports the app, and keep <code>index.js</code> as the entry point that calls <code>listen()</code>.
+    </div>
+
+    <pre><code>// app.js  (new file — move all route logic here, export app)
+const express   = require('express');
+const cors      = require('cors');
+const Candidate = require('./models/Candidate');
+const app = express();
+app.use(cors());
+app.use(express.json());
+// ... all route handlers ...
+module.exports = app;
+
+// index.js  (thin entry point — only responsible for DB connect + listen)
+const mongoose = require('mongoose');
+const app      = require('./app');
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/talent-tracker';
+mongoose.connect(MONGO_URI).then(() => app.listen(3001));</code></pre>
+
+    <h3>Running the Tests</h3>
+    <pre><code>cd /path/to/search-ui-demo/server
+npm test
+
+# Expected output:
+#  PASS  __tests__/candidates.test.js
+#    POST /api/candidates
+#      ✓ creates a candidate and returns 201
+#      ✓ returns 400 when name is missing
+#      ✓ rejects an invalid status value
+#    GET /api/candidates
+#      ✓ returns all candidates when no query params
+#      ✓ filters by skill
+#      ✓ filters by location
+#      ... (all green)</code></pre>
+  </section>
+
+  <!-- ─────────────── API DOCS ─────────────── -->
+  <section id="api-docs">
+    <span class="phase-label green">Documentation</span>
+    <h2>5. API Endpoint Documentation (curl Examples)</h2>
+    <p>Base URL: <code>http://localhost:3001</code></p>
+
+    <!-- GET /api/candidates -->
+    <h3>GET /api/candidates — Search &amp; Facet Candidates</h3>
+    <p>Returns a filtered, sorted list of candidates plus sidebar facet counts.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Query Param</th><th>Type</th><th>Default</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>q</code></td><td>string</td><td>""</td><td>Free-text search across name, bio, skills, location, role</td></tr>
+          <tr><td><code>skills</code></td><td>comma-separated string</td><td>—</td><td>Filter by one or more skills e.g. <code>React,Node.js</code></td></tr>
+          <tr><td><code>locations</code></td><td>comma-separated string</td><td>—</td><td>Filter by city e.g. <code>Austin,Seattle</code></td></tr>
+          <tr><td><code>statuses</code></td><td>comma-separated string</td><td>—</td><td>Filter by status: <code>Applied</code> | <code>Interview</code> | <code>Hired</code> | <code>Rejected</code></td></tr>
+          <tr><td><code>sort</code></td><td>enum</td><td><code>relevance</code></td><td><code>relevance</code> | <code>exp_desc</code> | <code>exp_asc</code> | <code>name_asc</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Example 1 — Fetch all candidates (no filters)</h4>
+    <pre><code>curl -s "http://localhost:3001/api/candidates" | jq .</code></pre>
+
+    <h4>Example 2 — Free-text search</h4>
+    <pre><code>curl -s "http://localhost:3001/api/candidates?q=React" | jq '.results[] | {name, skills}'</code></pre>
+
+    <h4>Example 3 — Filter by skill and location</h4>
+    <pre><code>curl -s "http://localhost:3001/api/candidates?skills=React,TypeScript&amp;locations=Austin" | jq .</code></pre>
+
+    <h4>Example 4 — Filter by status with exp sort</h4>
+    <pre><code>curl -s "http://localhost:3001/api/candidates?statuses=Interview,Applied&amp;sort=exp_desc" | jq '.results[] | {name, status, experience_years}'</code></pre>
+
+    <h4>Example 5 — Combine text search + skill filter</h4>
+    <pre><code>curl -s "http://localhost:3001/api/candidates?q=Node&amp;skills=Express&amp;sort=name_asc" | jq .</code></pre>
+
+    <h4>Sample Response Shape</h4>
+    <pre><code>{
+  "results": [
+    {
+      "_id":              "664a1b2c3d4e5f6a7b8c9d0e",
+      "name":             "Alice Example",
+      "email":            "alice@example.com",
+      "role":             "Frontend Developer",
+      "status":           "Applied",
+      "location":         "Austin",
+      "experience_years": 3,
+      "skills":           ["React", "TypeScript"],
+      "bio":              "Passionate frontend developer",
+      "applied_at":       "2024-05-20T10:00:00.000Z",
+      "createdAt":        "2024-05-20T10:00:00.000Z",
+      "updatedAt":        "2024-05-20T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "facets": {
+    "skills":    [{ "value": "React", "count": 14 }, { "value": "Node.js", "count": 9 }],
+    "locations": [{ "value": "Austin", "count": 7 }, { "value": "Seattle", "count": 5 }],
+    "statuses":  [{ "value": "Applied", "count": 20 }, { "value": "Hired", "count": 8 }]
+  }
+}</code></pre>
+
+    <!-- POST /api/candidates -->
+    <h3>POST /api/candidates — Create a New Candidate</h3>
+    <p>Creates a new candidate document. Returns the full saved document on success.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>string</td><td>Yes</td><td>Candidate's full name</td></tr>
+          <tr><td><code>email</code></td><td>string</td><td>No</td><td>Stored lowercase</td></tr>
+          <tr><td><code>phone</code></td><td>string</td><td>No</td><td></td></tr>
+          <tr><td><code>role</code></td><td>string</td><td>No</td><td>e.g. "Frontend Developer"</td></tr>
+          <tr><td><code>status</code></td><td>enum</td><td>No</td><td>Applied | Interview | Hired | Rejected (default: Applied)</td></tr>
+          <tr><td><code>skills</code></td><td>string[]</td><td>No</td><td>Array of skill strings</td></tr>
+          <tr><td><code>location</code></td><td>string</td><td>No</td><td>City name</td></tr>
+          <tr><td><code>experience_years</code></td><td>number</td><td>No</td><td>Default: 0</td></tr>
+          <tr><td><code>bio</code></td><td>string</td><td>No</td><td>Short biography / summary</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Example 1 — Create a minimal candidate (name only)</h4>
+    <pre><code>curl -s -X POST "http://localhost:3001/api/candidates" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Jane Doe" }' | jq .</code></pre>
+
+    <h4>Example 2 — Create a full candidate record</h4>
+    <pre><code>curl -s -X POST "http://localhost:3001/api/candidates" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name":             "Bob Smith",
+    "email":            "bob@example.com",
+    "role":             "Backend Engineer",
+    "status":           "Interview",
+    "location":         "Seattle",
+    "experience_years": 5,
+    "skills":           ["Node.js", "Express", "MongoDB"],
+    "bio":              "Loves building fast APIs and clean architecture."
+  }' | jq .</code></pre>
+
+    <h4>Success Response — 201 Created</h4>
+    <pre><code>{
+  "_id":              "664a1b2c3d4e5f6a7b8c9d0f",
+  "name":             "Bob Smith",
+  "email":            "bob@example.com",
+  "role":             "Backend Engineer",
+  "status":           "Interview",
+  "location":         "Seattle",
+  "experience_years": 5,
+  "skills":           ["Node.js", "Express", "MongoDB"],
+  "bio":              "Loves building fast APIs and clean architecture.",
+  "applied_at":       "2026-04-25T09:30:00.000Z",
+  "createdAt":        "2026-04-25T09:30:00.000Z",
+  "updatedAt":        "2026-04-25T09:30:00.000Z",
+  "__v": 0
+}</code></pre>
+
+    <h4>Error Response — 400 Bad Request</h4>
+    <pre><code>// Missing required field "name":
+curl -s -X POST "http://localhost:3001/api/candidates" \
+  -H "Content-Type: application/json" \
+  -d '{ "role": "Designer" }'
+
+// Response:
+{
+  "error": "candidates validation failed: name: Path `name` is required."
+}</code></pre>
+  </section>
+
+  <!-- ─────────────── FEEDBACK ─────────────── -->
+  <section id="feedback">
+    <span class="phase-label purple">Personal</span>
+    <h2>6. Code Review &amp; Personal Feedback — Aruna</h2>
+
+    <h3>What You Did Well</h3>
+    <div class="feedback-box">
+      <strong>Highlight:</strong> The <code>$facet</code> aggregation pipeline is a genuinely advanced MongoDB pattern — using it correctly on a first pass is impressive for an intern. The sidebar facet counts staying stable while results filter is exactly how e-commerce search works (think Amazon). Well done.
+    </div>
+
+    <ul class="bullets">
+      <li>Code is clean and easy to read — variable names are self-documenting (<code>skillsArr</code>, <code>facetMatch</code>, <code>sortMap</code>)</li>
+      <li>The <code>sortMap</code> lookup object is a clean alternative to a big <code>if/else</code> chain</li>
+      <li>Response shape (<code>results</code>, <code>total</code>, <code>facets</code>) is well-structured — a frontend consumer can immediately use it</li>
+      <li>CORS and JSON middleware are set up correctly for a React frontend</li>
+      <li>Mongo connection error handling exits the process cleanly — correct for a server</li>
+    </ul>
+
+    <h3>Areas to Improve</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Finding</th><th>Severity</th><th>What to do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>No indexes declared on the schema</td>
+            <td><span class="highlight-yellow">Medium</span></td>
+            <td>Add the text index + filter indexes from section 3. This is the single biggest performance win available.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>$regex</code> for free-text search</td>
+            <td><span class="highlight-yellow">Medium</span></td>
+            <td>Switch to <code>$text: { $search: q }</code> after adding the text index (section 2).</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>No test coverage</td>
+            <td><span class="highlight-yellow">Medium</span></td>
+            <td>Add the Jest tests from section 4. Target: all happy paths + the three validation error cases.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><code>app.listen()</code> is inside <code>index.js</code> — can't test without starting server</td>
+            <td><span class="highlight-yellow">Low–Medium</span></td>
+            <td>Split into <code>app.js</code> (routes) and <code>index.js</code> (listen). Required to use Supertest cleanly.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>No input sanitisation on <code>q</code> param</td>
+            <td><span class="highlight-yellow">Low</span></td>
+            <td>The regex is built directly from user input — a user who sends <code>?q=.*</code> gets a very expensive regex. Trim and limit length: <code>q.trim().slice(0, 100)</code>.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Total count is post-filter, not pre-filter</td>
+            <td><span class="highlight-blue">Minor</span></td>
+            <td><code>total: data.results.length</code> reflects the filtered count, which is correct for pagination. Just be consistent in API docs.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>A Code Smell to Discuss</h3>
+    <p>Look at this line in the facet pipeline:</p>
+    <pre><code>// index.js line 101 — location_facet
+{ $match: { location: { $exists: true, $ne: null, $ne: '' } } },</code></pre>
+    <div class="warning">
+      <strong>Duplicate key issue:</strong> The object literal has <code>$ne</code> twice — the second one silently overwrites the first in JavaScript. This means you're only guarding against <code>""</code> (empty string) but not <code>null</code>. Fix:<br><br>
+      <code>{ $match: { location: { $exists: true, $nin: [null, ''] } } }</code>
+    </div>
+
+    <h3>Goal-Setting for Second Half of Programme</h3>
+
+    <ul class="steps">
+      <li><strong>Week 1:</strong> Add the Mongoose index declarations (section 3) — verify with <code>.explain()</code> that queries switch from <code>COLLSCAN</code> to <code>IXSCAN</code>.</li>
+      <li><strong>Week 2:</strong> Split <code>index.js</code> → <code>app.js</code> + <code>index.js</code>, then write and pass the Jest test suite from section 4.</li>
+      <li><strong>Week 3:</strong> Switch free-text search from <code>$regex</code> to <code>$text</code>. Compare response times with a larger dataset (10k docs).</li>
+      <li><strong>Week 4:</strong> Write the API documentation as a proper README.md using the curl examples from section 5, then present the final result to the team.</li>
+    </ul>
+
+    <div class="tip">
+      <strong>Keep going:</strong> You have tackled genuinely advanced topics (MongoDB aggregation, faceted search) in a short time. The second half is about hardening what you have — indexes, tests, and documentation are what make a feature production-ready rather than just a demo.
+    </div>
+  </section>
+
+</main>
+</body>
+</html>
