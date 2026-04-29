@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude API — Intern Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 50%, #2563eb 100%);
+      padding: 60px 40px 50px;
+      text-align: center;
+      border-bottom: 1px solid #dbeafe;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: #e86e2c22;
+      border: 1px solid #e86e2c55;
+      color: #e86e2c;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+    .hero h1 span { color: #e86e2c; }
+    .hero p {
+      font-size: 1.1rem;
+      color: #a0a8b8;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 28px 40px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+    .progress-bar .step-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      color: #94a3b8;
+      margin: 4px 6px;
+      transition: all 0.2s;
+    }
+    .progress-bar .step-pill .num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .progress-bar .step-pill.active {
+      background: #eff6ff;
+      border-color: #3b5bdb;
+      color: #3b5bdb;
+    }
+    .progress-bar .step-pill.active .num {
+      background: #3b5bdb;
+      color: #fff;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 28px; }
+
+    /* ── Section heading ── */
+    .section {
+      padding: 60px 0 20px;
+    }
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+    .section-label .num-big {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3b5bdb, #1971c2);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-label h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
+    }
+    .section-label p {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 50px 0 0;
+    }
+
+    /* ── Step card ── */
+    .step-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 28px 30px;
+      margin-bottom: 18px;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .step-card:hover { border-color: #d1d5db; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .step-card .step-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .step-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 10px;
+    }
+    .step-card p { color: #4b5563; font-size: 14.5px; margin-bottom: 10px; }
+    .step-card p:last-child { margin-bottom: 0; }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      font-size: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .callout .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+    .callout.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .callout.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .callout.danger  { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .callout strong { font-weight: 600; }
+
+    /* ── Code blocks ── */
+    .code-wrap { position: relative; margin: 14px 0; }
+    .code-wrap .lang-tag {
+      position: absolute;
+      top: 10px; left: 14px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px; right: 10px;
+      background: #374151;
+      border: 1px solid #4b5563;
+      border-radius: 6px;
+      color: #d1d5db;
+      font-size: 11px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover { background: #4b5563; color: #f9fafb; }
+    .copy-btn.copied { background: #14532d; border-color: #16a34a; color: #86efac; }
+    pre {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 38px 18px 18px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.65;
+      font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", monospace;
+    }
+    code { color: #e2e8f0; }
+
+    /* syntax colors */
+    .kw  { color: #c792ea; }  /* keywords */
+    .str { color: #c3e88d; }  /* strings */
+    .cmt { color: #546e7a; font-style: italic; }  /* comments */
+    .fn  { color: #82aaff; }  /* functions */
+    .num { color: #f78c6c; }  /* numbers/consts */
+    .typ { color: #ffcb6b; }  /* types */
+    .var { color: #eeffff; }  /* variables */
+    .punc{ color: #89ddff; }  /* punctuation */
+    .jsx { color: #89ddff; }  /* JSX tags */
+
+    /* ── Inline code ── */
+    .ic {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 5px;
+      padding: 1px 7px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #c2410c;
+    }
+
+    /* ── Check list ── */
+    .checklist { list-style: none; padding: 0; margin: 12px 0; }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      font-size: 14.5px;
+      color: #374151;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li .chk {
+      width: 20px; height: 20px;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-size: 11px;
+      color: #16a34a;
+      background: #f0fdf4;
+      border: 2px solid #16a34a;
+    }
+
+    /* ── Concept grid ── */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin: 14px 0;
+    }
+    .concept-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .concept-card .icon { font-size: 24px; margin-bottom: 8px; }
+    .concept-card h4 { font-size: 14px; color: #111827; margin-bottom: 5px; }
+    .concept-card p { font-size: 13px; color: #6b7280; }
+
+    /* ── Flow arrows ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 14px 0;
+    }
+    .flow .box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+    .flow .arrow { color: #3b5bdb; font-size: 18px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: #9ca3af;
+      font-size: 13px;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 60px;
+      background: #f9fafb;
+    }
+    footer a { color: #6b7280; text-decoration: none; }
+    footer a:hover { color: #374151; }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="badge">Intern Onboarding</div>
+  <h1>Building with the <span>Claude API</span></h1>
+  <p>A beginner-friendly, step-by-step guide to integrating Anthropic's Claude AI into your React applications.</p>
+</div>
+
+<!-- Progress pills -->
+<div class="progress-bar">
+  <div class="step-pill active">
+    <span class="num">0</span> AI / LLM / Vector DB
+  </div>
+  <div class="step-pill active">
+    <span class="num">1</span> Intro to Claude API
+  </div>
+  <div class="step-pill active">
+    <span class="num">2</span> API Key Setup
+  </div>
+  <div class="step-pill active">
+    <span class="num">3</span> First Completion
+  </div>
+  <div class="step-pill active">
+    <span class="num">4</span> React Component
+  </div>
+  <div class="step-pill active">
+    <span class="num">5</span> Streaming
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════════
+       SECTION 0 — FOUNDATIONAL CONCEPTS
+  ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num-big" style="background: linear-gradient(135deg, #7c3aed, #a855f7);">0</div>
+      <div>
+        <h2>Before You Begin — Key Concepts Explained</h2>
+        <p>AI, LLMs, and Vector Databases in plain English</p>
+      </div>
+    </div>
+
+    <!-- WHAT IS AI -->
+    <div class="step-card">
+      <div class="step-tag">Concept 1</div>
+      <h3>What is AI (Artificial Intelligence)?</h3>
+      <p>AI means teaching a computer to do things that normally require human intelligence — like understanding language, recognising faces, or making decisions.</p>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:14px 0;">
+        <p style="font-weight:600;color:#111827;margin-bottom:10px;">Real-life analogy</p>
+        <p>Think of training a dog. You show it hundreds of examples — "sit", "stay", "fetch" — and it learns patterns. AI is similar: instead of a dog, it's a program. Instead of commands, you feed it millions of examples (text, images, numbers), and it learns the patterns inside that data.</p>
+      </div>
+
+      <div class="concept-grid" style="margin-top:16px;">
+        <div class="concept-card">
+          <div class="icon">🖼️</div>
+          <h4>Image AI</h4>
+          <p>Trained on photos — learns to say "this is a cat" vs "this is a dog".</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🗣️</div>
+          <h4>Voice AI</h4>
+          <p>Trained on audio — learns to turn speech into text (like Siri or Alexa).</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">💬</div>
+          <h4>Language AI</h4>
+          <p>Trained on text — learns to read, write, and chat like a human. This is what Claude is.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHAT IS AN LLM -->
+    <div class="step-card">
+      <div class="step-tag">Concept 2</div>
+      <h3>What is an LLM (Large Language Model)?</h3>
+      <p>An LLM is a type of AI that specialises in <strong>understanding and generating text</strong>. Claude, ChatGPT, and Gemini are all LLMs. The "large" means it was trained on an enormous amount of text — think billions of web pages, books, and articles.</p>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:14px 0;">
+        <p style="font-weight:600;color:#111827;margin-bottom:10px;">How does it actually work? (Simple version)</p>
+        <p>An LLM reads a prompt and predicts what the best next word is, then the next, then the next — until it has a full answer. It's like a very sophisticated autocomplete that has read almost all of the internet.</p>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:6px 12px;font-size:13px;color:#1d4ed8;">You type: "The sky is..."</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:6px 12px;font-size:13px;color:#1d4ed8;">LLM predicts: "blue"</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:6px 12px;font-size:13px;color:#1d4ed8;">then: "because..."</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:6px 12px;font-size:13px;color:#1d4ed8;">and so on...</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <span class="icon">💡</span>
+        <div><strong>Key point for developers:</strong> You never see the math inside an LLM. You just send it text (a <em>prompt</em>) and get text back (a <em>completion</em>). The Claude API is simply the interface for doing this from your code.</div>
+      </div>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:14px 0;">
+        <p style="font-weight:600;color:#111827;margin-bottom:12px;">LLMs vs traditional programs</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+          <thead>
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <th style="text-align:left;padding:8px 10px;color:#6b7280;font-weight:600;"></th>
+              <th style="text-align:left;padding:8px 10px;color:#6b7280;font-weight:600;">Traditional Program</th>
+              <th style="text-align:left;padding:8px 10px;color:#6b7280;font-weight:600;">LLM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:9px 10px;color:#374151;font-weight:600;">Rules</td>
+              <td style="padding:9px 10px;color:#4b5563;">You write every rule (if/else)</td>
+              <td style="padding:9px 10px;color:#4b5563;">It learns rules from data</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f3f4f6;background:#fafafa;">
+              <td style="padding:9px 10px;color:#374151;font-weight:600;">Unknown input</td>
+              <td style="padding:9px 10px;color:#4b5563;">Crashes or returns error</td>
+              <td style="padding:9px 10px;color:#4b5563;">Makes a reasonable guess</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 10px;color:#374151;font-weight:600;">Example task</td>
+              <td style="padding:9px 10px;color:#4b5563;">Sort a list of numbers</td>
+              <td style="padding:9px 10px;color:#4b5563;">Summarise a news article</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHAT IS A VECTOR DB -->
+    <div class="step-card">
+      <div class="step-tag">Concept 3</div>
+      <h3>What is a Vector Database?</h3>
+      <p>This one sounds scary but the idea is simple. LLMs are very powerful but they have a <strong>memory limit</strong> — you can only send them so much text at once (called the <em>context window</em>). A Vector DB solves the problem of searching huge collections of documents to find only the relevant parts before sending them to the LLM.</p>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:14px 0;">
+        <p style="font-weight:600;color:#111827;margin-bottom:10px;">Step 1 — What is a "vector"?</p>
+        <p>A vector is just a list of numbers that represents the <strong>meaning</strong> of a piece of text. An AI model converts text into these numbers. Similar meanings produce similar numbers.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 14px;font-size:13px;color:#166534;">"The dog barked loudly"</div>
+          <div style="color:#6b7280;font-size:16px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 14px;font-size:12px;color:#1d4ed8;font-family:monospace;">[0.12, 0.87, 0.34, 0.56 ...]</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 14px;font-size:13px;color:#166534;">"A puppy made a noise"</div>
+          <div style="color:#6b7280;font-size:16px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 14px;font-size:12px;color:#1d4ed8;font-family:monospace;">[0.11, 0.85, 0.36, 0.54 ...]</div>
+        </div>
+        <p style="margin-top:10px;color:#6b7280;font-size:13px;">Notice how similar sentences produce similar numbers? That's the magic — the database can find semantically related content, not just keyword matches.</p>
+      </div>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:14px 0;">
+        <p style="font-weight:600;color:#111827;margin-bottom:10px;">Real-world analogy — the library</p>
+        <p>Imagine a giant library with 1 million books. You ask: <em>"Find me everything about training puppies."</em></p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:5px 10px;font-size:12px;color:#991b1b;white-space:nowrap;font-weight:600;">Old way</div>
+            <p style="color:#4b5563;font-size:13.5px;margin:0;">Search every page for the words "puppy" and "training". Misses books that say "dog obedience" instead.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:5px 10px;font-size:12px;color:#166534;white-space:nowrap;font-weight:600;">Vector DB</div>
+            <p style="color:#4b5563;font-size:13.5px;margin:0;">Converts your question to a vector, finds books whose vectors are <em>closest</em> in meaning. Finds "puppy training", "dog obedience", and "canine behaviour" — all semantically related.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:14px 0;">
+        <p style="font-weight:600;color:#111827;margin-bottom:12px;">How it plugs into an LLM app (RAG pattern)</p>
+        <p style="color:#4b5563;font-size:13.5px;margin-bottom:12px;">This pattern is called <strong>RAG — Retrieval-Augmented Generation</strong>. Instead of stuffing 1 million documents into Claude (impossible), you retrieve only the 3-5 most relevant chunks and send those.</p>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;font-size:12px;color:#1d4ed8;text-align:center;">User asks a<br>question</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;font-size:12px;color:#1d4ed8;text-align:center;">Convert to<br>vector</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;font-size:12px;color:#1d4ed8;text-align:center;">Search<br>Vector DB</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;font-size:12px;color:#1d4ed8;text-align:center;">Get top 5<br>relevant chunks</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;font-size:12px;color:#1d4ed8;text-align:center;">Send to<br>Claude API</div>
+          <div style="color:#6b7280;font-size:18px;">→</div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px;font-size:12px;color:#166534;text-align:center;">Smart grounded<br>answer</div>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <span class="icon">✅</span>
+        <div><strong>Popular Vector DBs you may hear about:</strong> Pinecone, Weaviate, Qdrant, pgvector (a Postgres extension), and Chroma. For this guide we focus on the Claude API — Vector DBs become relevant when you build a full RAG app later.</div>
+      </div>
+    </div>
+
+    <!-- QUICK GLOSSARY -->
+    <div class="step-card">
+      <div class="step-tag">Quick Glossary</div>
+      <h3>Terms you'll hear every day — decoded</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+        <thead>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <th style="text-align:left;padding:9px 12px;color:#6b7280;font-weight:600;background:#f9fafb;border-radius:6px 0 0 0;">Term</th>
+            <th style="text-align:left;padding:9px 12px;color:#6b7280;font-weight:600;background:#f9fafb;">What it means in plain English</th>
+            <th style="text-align:left;padding:9px 12px;color:#6b7280;font-weight:600;background:#f9fafb;border-radius:0 6px 0 0;">Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">Prompt</td>
+            <td style="padding:9px 12px;color:#374151;">The message you send to the AI</td>
+            <td style="padding:9px 12px;color:#6b7280;">"Summarise this article in 3 bullets"</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;background:#fafafa;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">Completion</td>
+            <td style="padding:9px 12px;color:#374151;">The AI's reply to your prompt</td>
+            <td style="padding:9px 12px;color:#6b7280;">• Point 1 • Point 2 • Point 3</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">Token</td>
+            <td style="padding:9px 12px;color:#374151;">A chunk of text (roughly 1 word = 1–2 tokens). API pricing is per token.</td>
+            <td style="padding:9px 12px;color:#6b7280;">"Hello world" ≈ 2 tokens</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;background:#fafafa;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">Context Window</td>
+            <td style="padding:9px 12px;color:#374151;">How much text the LLM can "see" at once (its working memory)</td>
+            <td style="padding:9px 12px;color:#6b7280;">Claude: up to 200,000 tokens</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">Embedding</td>
+            <td style="padding:9px 12px;color:#374151;">Converting text into a vector (list of numbers) that captures its meaning</td>
+            <td style="padding:9px 12px;color:#6b7280;">"cat" → [0.2, 0.8, 0.1 ...]</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;background:#fafafa;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">RAG</td>
+            <td style="padding:9px 12px;color:#374151;">Retrieval-Augmented Generation — search your docs first, then ask the LLM</td>
+            <td style="padding:9px 12px;color:#6b7280;">AI customer support bot</td>
+          </tr>
+          <tr style="background:#fafafa;">
+            <td style="padding:9px 12px;color:#7c3aed;font-weight:600;font-family:monospace;">System Prompt</td>
+            <td style="padding:9px 12px;color:#374151;">Instructions you give the AI before the conversation starts (sets its persona/rules)</td>
+            <td style="padding:9px 12px;color:#6b7280;">"You are a helpful coding tutor"</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ══════════════════════════════════════════
+       SECTION 1 — INTRO
+  ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num-big">1</div>
+      <div>
+        <h2>Introduction to the Claude API</h2>
+        <p>What it is, why we use it, and how it works</p>
+      </div>
+    </div>
+
+    <!-- What is Claude API -->
+    <div class="step-card">
+      <div class="step-tag">Concept</div>
+      <h3>What is the Anthropic Claude API?</h3>
+      <p>The Claude API lets your app <strong>talk to Claude AI</strong> — you send it a message, it sends back a smart response. Think of it like texting a genius assistant who can answer questions, write code, summarize documents, and much more.</p>
+      <div class="concept-grid" style="margin-top:16px;">
+        <div class="concept-card">
+          <div class="icon">🤖</div>
+          <h4>Claude</h4>
+          <p>Anthropic's AI model — the brain behind your app.</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🔗</div>
+          <h4>API</h4>
+          <p>A bridge: your code sends a request, Claude sends a response.</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">⚡</div>
+          <h4>Streaming</h4>
+          <p>Get the response word-by-word in real time, not all at once.</p>
+        </div>
+        <div class="concept-card">
+          <div class="icon">🔑</div>
+          <h4>API Key</h4>
+          <p>Your secret password to access the Claude API.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="step-card">
+      <div class="step-tag">How It Works</div>
+      <h3>The request/response cycle</h3>
+      <p>Every interaction follows this simple flow:</p>
+      <div class="flow">
+        <div class="box">Your App</div>
+        <div class="arrow">→</div>
+        <div class="box">POST /v1/messages</div>
+        <div class="arrow">→</div>
+        <div class="box">Anthropic Server</div>
+        <div class="arrow">→</div>
+        <div class="box">Claude Model</div>
+        <div class="arrow">→</div>
+        <div class="box">Response JSON</div>
+      </div>
+      <p style="margin-top:12px;">You send a <strong>messages</strong> array (a conversation history) and Claude responds with text. That's it at its core!</p>
+    </div>
+
+    <!-- Model -->
+    <div class="step-card">
+      <div class="step-tag">Models</div>
+      <h3>Which model should I use?</h3>
+      <p>For this guide we'll use <span class="ic">claude-sonnet-4-6</span> — a great balance of speed and intelligence. Here's the quick reference:</p>
+      <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px;">
+        <thead>
+          <tr style="border-bottom:1px solid #2a2a2a;">
+            <th style="text-align:left;padding:8px 10px;color:#888;font-weight:600;">Model</th>
+            <th style="text-align:left;padding:8px 10px;color:#888;font-weight:600;">Use When</th>
+            <th style="text-align:left;padding:8px 10px;color:#888;font-weight:600;">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #1e1e1e;">
+            <td style="padding:9px 10px;color:#ffcb6b;font-family:monospace;">claude-opus-4-6</td>
+            <td style="padding:9px 10px;color:#aaa;">Complex reasoning, best quality</td>
+            <td style="padding:9px 10px;color:#aaa;">$$$</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e1e1e;background:#1a1a1a;">
+            <td style="padding:9px 10px;color:#86efac;font-family:monospace;">claude-sonnet-4-6 ✓</td>
+            <td style="padding:9px 10px;color:#aaa;">General use, this guide</td>
+            <td style="padding:9px 10px;color:#aaa;">$$</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 10px;color:#ffcb6b;font-family:monospace;">claude-haiku-4-5</td>
+            <td style="padding:9px 10px;color:#aaa;">Simple tasks, fastest, cheapest</td>
+            <td style="padding:9px 10px;color:#aaa;">$</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ══════════════════════════════════════════
+       SECTION 2 — API KEY SETUP
+  ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num-big">2</div>
+      <div>
+        <h2>Set Up Your API Key</h2>
+        <p>Get your key and add it to the project safely</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 2.1 — Get your key</div>
+      <h3>Create an Anthropic API key</h3>
+      <ul class="checklist">
+        <li><span class="chk">✓</span> Go to <strong>console.anthropic.com</strong> and sign in</li>
+        <li><span class="chk">✓</span> Click <strong>API Keys</strong> in the left sidebar</li>
+        <li><span class="chk">✓</span> Click <strong>Create Key</strong>, give it a name (e.g. "intern-dev")</li>
+        <li><span class="chk">✓</span> Copy the key — it starts with <span class="ic">sk-ant-...</span></li>
+      </ul>
+      <div class="callout danger">
+        <span class="icon">🚨</span>
+        <div><strong>Never commit your API key to Git!</strong> If you accidentally push it, rotate it immediately in the console. Anyone with your key can use your account.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 2.2 — Create .env file</div>
+      <h3>Store your key in an environment variable</h3>
+      <p>In the <strong>root of the project</strong>, create a file named <span class="ic">.env</span>:</p>
+      <div class="code-wrap">
+        <span class="lang-tag">Shell / .env</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="cmt"># .env  — DO NOT commit this file to Git</span>
+<span class="var">ANTHROPIC_API_KEY</span><span class="punc">=</span><span class="str">sk-ant-your-actual-key-here</span></code></pre>
+      </div>
+      <div class="callout info">
+        <span class="icon">💡</span>
+        <div>Open <strong>.gitignore</strong> and make sure <span class="ic">.env</span> is listed there. If it's missing, add it on its own line.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 2.3 — Install the SDK</div>
+      <h3>Add the Anthropic SDK to your project</h3>
+      <p>In your terminal, from the project root:</p>
+      <div class="code-wrap">
+        <span class="lang-tag">Terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="cmt"># Using npm</span>
+npm install @anthropic-ai/sdk
+
+<span class="cmt"># Or yarn</span>
+yarn add @anthropic-ai/sdk</code></pre>
+      </div>
+      <p>Check it worked — you should see <span class="ic">@anthropic-ai/sdk</span> inside <span class="ic">package.json</span> dependencies.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 2.4 — Server side only!</div>
+      <h3>Important: API calls belong on the server</h3>
+      <p>Your API key <strong>must never be sent to the browser</strong>. React code runs in the browser, so we need a small backend (Node.js / Express) to make the actual API calls. Your React component talks to <em>your server</em>, which then calls Claude.</p>
+      <div class="flow">
+        <div class="box">Browser (React)</div>
+        <div class="arrow">→</div>
+        <div class="box">Your Server (Node)</div>
+        <div class="arrow">→</div>
+        <div class="box">Claude API</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ══════════════════════════════════════════
+       SECTION 3 — FIRST COMPLETION
+  ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num-big">3</div>
+      <div>
+        <h2>Make Your First API Request</h2>
+        <p>Send a message and get a response from Claude</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 3.1 — Basic Node.js test</div>
+      <h3>Create a quick test script</h3>
+      <p>Create a file called <span class="ic">test-claude.js</span> in your project root and run it with Node.js to verify your key works.</p>
+      <div class="code-wrap">
+        <span class="lang-tag">JavaScript — test-claude.js</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="cmt">// test-claude.js</span>
+<span class="kw">import</span> Anthropic <span class="kw">from</span> <span class="str">"@anthropic-ai/sdk"</span><span class="punc">;</span>
+
+<span class="cmt">// The SDK automatically reads ANTHROPIC_API_KEY from your environment</span>
+<span class="kw">const</span> <span class="var">client</span> <span class="punc">=</span> <span class="kw">new</span> <span class="typ">Anthropic</span><span class="punc">();</span>
+
+<span class="kw">const</span> <span class="var">response</span> <span class="punc">=</span> <span class="kw">await</span> <span class="var">client</span><span class="punc">.</span><span class="fn">messages</span><span class="punc">.</span><span class="fn">create</span><span class="punc">({</span>
+  <span class="var">model</span><span class="punc">:</span> <span class="str">"claude-sonnet-4-6"</span><span class="punc">,</span>
+  <span class="var">max_tokens</span><span class="punc">:</span> <span class="num">1024</span><span class="punc">,</span>
+  <span class="var">messages</span><span class="punc">: [</span>
+    <span class="punc">{</span>
+      <span class="var">role</span><span class="punc">:</span> <span class="str">"user"</span><span class="punc">,</span>
+      <span class="var">content</span><span class="punc">:</span> <span class="str">"Say hello and tell me one fun fact about space!"</span>
+    <span class="punc">}</span>
+  <span class="punc">]</span>
+<span class="punc">});</span>
+
+<span class="cmt">// response.content is an array — grab the first text block</span>
+<span class="var">console</span><span class="punc">.</span><span class="fn">log</span><span class="punc">(</span><span class="var">response</span><span class="punc">.</span><span class="var">content</span><span class="punc">[</span><span class="num">0</span><span class="punc">].</span><span class="var">text</span><span class="punc">);</span></code></pre>
+      </div>
+      <div class="code-wrap">
+        <span class="lang-tag">Terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>node test-claude.js</code></pre>
+      </div>
+      <div class="callout success">
+        <span class="icon">✅</span>
+        <div>If you see Claude's response printed in the terminal, your API key is working!</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 3.2 — Understanding the response</div>
+      <h3>What does the response look like?</h3>
+      <p>Let's look at the full structure Claude returns:</p>
+      <div class="code-wrap">
+        <span class="lang-tag">JSON — example response</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="punc">{</span>
+  <span class="str">"id"</span><span class="punc">:</span> <span class="str">"msg_01XFDUDYJgAACzvnptvVoYEL"</span><span class="punc">,</span>
+  <span class="str">"type"</span><span class="punc">:</span> <span class="str">"message"</span><span class="punc">,</span>
+  <span class="str">"role"</span><span class="punc">:</span> <span class="str">"assistant"</span><span class="punc">,</span>
+  <span class="str">"model"</span><span class="punc">:</span> <span class="str">"claude-sonnet-4-6"</span><span class="punc">,</span>
+  <span class="str">"content"</span><span class="punc">: [</span>
+    <span class="punc">{</span>
+      <span class="str">"type"</span><span class="punc">:</span> <span class="str">"text"</span><span class="punc">,</span>                 <span class="cmt">// could also be "tool_use" etc.</span>
+      <span class="str">"text"</span><span class="punc">:</span> <span class="str">"Hello! Here's a fun fact..."</span>
+    <span class="punc">}</span>
+  <span class="punc">],</span>
+  <span class="str">"stop_reason"</span><span class="punc">:</span> <span class="str">"end_turn"</span><span class="punc">,</span>       <span class="cmt">// "end_turn" means Claude finished naturally</span>
+  <span class="str">"usage"</span><span class="punc">: {</span>
+    <span class="str">"input_tokens"</span><span class="punc">:</span> <span class="num">25</span><span class="punc">,</span>            <span class="cmt">// tokens in your message</span>
+    <span class="str">"output_tokens"</span><span class="punc">:</span> <span class="num">86</span>            <span class="cmt">// tokens in Claude's reply</span>
+  <span class="punc">}</span>
+<span class="punc">}</span></code></pre>
+      </div>
+      <p>The text you want is always at: <span class="ic">response.content[0].text</span></p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 3.3 — Express endpoint</div>
+      <h3>Create a server route for Claude</h3>
+      <p>Now let's expose this from your Express server so React can call it:</p>
+      <div class="code-wrap">
+        <span class="lang-tag">JavaScript — server/routes/claude.js</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="kw">import</span> express <span class="kw">from</span> <span class="str">"express"</span><span class="punc">;</span>
+<span class="kw">import</span> Anthropic <span class="kw">from</span> <span class="str">"@anthropic-ai/sdk"</span><span class="punc">;</span>
+
+<span class="kw">const</span> <span class="var">router</span> <span class="punc">=</span> <span class="var">express</span><span class="punc">.</span><span class="fn">Router</span><span class="punc">();</span>
+<span class="kw">const</span> <span class="var">client</span> <span class="punc">=</span> <span class="kw">new</span> <span class="typ">Anthropic</span><span class="punc">();</span>  <span class="cmt">// reads ANTHROPIC_API_KEY automatically</span>
+
+<span class="cmt">// POST /api/claude/chat</span>
+<span class="var">router</span><span class="punc">.</span><span class="fn">post</span><span class="punc">(</span><span class="str">"/chat"</span><span class="punc">,</span> <span class="kw">async</span> <span class="punc">(</span><span class="var">req</span><span class="punc">,</span> <span class="var">res</span><span class="punc">) =></span> <span class="punc">{</span>
+  <span class="kw">try</span> <span class="punc">{</span>
+    <span class="kw">const</span> <span class="punc">{</span> <span class="var">message</span> <span class="punc">}</span> <span class="punc">=</span> <span class="var">req</span><span class="punc">.</span><span class="var">body</span><span class="punc">;</span>
+
+    <span class="kw">const</span> <span class="var">response</span> <span class="punc">=</span> <span class="kw">await</span> <span class="var">client</span><span class="punc">.</span><span class="fn">messages</span><span class="punc">.</span><span class="fn">create</span><span class="punc">({</span>
+      <span class="var">model</span><span class="punc">:</span> <span class="str">"claude-sonnet-4-6"</span><span class="punc">,</span>
+      <span class="var">max_tokens</span><span class="punc">:</span> <span class="num">1024</span><span class="punc">,</span>
+      <span class="var">messages</span><span class="punc">: [{ </span><span class="var">role</span><span class="punc">:</span> <span class="str">"user"</span><span class="punc">,</span> <span class="var">content</span><span class="punc">:</span> <span class="var">message</span> <span class="punc">}]</span>
+    <span class="punc">});</span>
+
+    <span class="var">res</span><span class="punc">.</span><span class="fn">json</span><span class="punc">({</span>
+      <span class="var">reply</span><span class="punc">:</span> <span class="var">response</span><span class="punc">.</span><span class="var">content</span><span class="punc">[</span><span class="num">0</span><span class="punc">].</span><span class="var">text</span>
+    <span class="punc">});</span>
+  <span class="punc">}</span> <span class="kw">catch</span> <span class="punc">(</span><span class="var">err</span><span class="punc">) {</span>
+    <span class="var">console</span><span class="punc">.</span><span class="fn">error</span><span class="punc">(</span><span class="str">"Claude error:"</span><span class="punc">,</span> <span class="var">err</span><span class="punc">.</span><span class="var">message</span><span class="punc">);</span>
+    <span class="var">res</span><span class="punc">.</span><span class="fn">status</span><span class="punc">(</span><span class="num">500</span><span class="punc">).</span><span class="fn">json</span><span class="punc">({</span> <span class="var">error</span><span class="punc">:</span> <span class="str">"Failed to get response"</span> <span class="punc">});</span>
+  <span class="punc">}</span>
+<span class="punc">});</span>
+
+<span class="kw">export default</span> <span class="var">router</span><span class="punc">;</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ══════════════════════════════════════════
+       SECTION 4 — REACT COMPONENT
+  ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num-big">4</div>
+      <div>
+        <h2>Build a React Chat Component</h2>
+        <p>A functional component that talks to your server</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 4.1 — Component skeleton</div>
+      <h3>Create <span class="ic">src/components/ClaudeChat.jsx</span></h3>
+      <p>Here is a simple but complete chat component. Read through each comment — it explains every part.</p>
+      <div class="code-wrap">
+        <span class="lang-tag">JSX — ClaudeChat.jsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="kw">import</span> <span class="punc">{</span> <span class="var">useState</span> <span class="punc">}</span> <span class="kw">from</span> <span class="str">"react"</span><span class="punc">;</span>
+
+<span class="kw">export default function</span> <span class="fn">ClaudeChat</span><span class="punc">() {</span>
+  <span class="cmt">// 1. State: the current text in the input box</span>
+  <span class="kw">const</span> <span class="punc">[</span><span class="var">input</span><span class="punc">,</span> <span class="var">setInput</span><span class="punc">]</span> <span class="punc">=</span> <span class="fn">useState</span><span class="punc">(</span><span class="str">""</span><span class="punc">);</span>
+
+  <span class="cmt">// 2. State: Claude's reply text</span>
+  <span class="kw">const</span> <span class="punc">[</span><span class="var">reply</span><span class="punc">,</span> <span class="var">setReply</span><span class="punc">]</span> <span class="punc">=</span> <span class="fn">useState</span><span class="punc">(</span><span class="str">""</span><span class="punc">);</span>
+
+  <span class="cmt">// 3. State: show a spinner while waiting</span>
+  <span class="kw">const</span> <span class="punc">[</span><span class="var">loading</span><span class="punc">,</span> <span class="var">setLoading</span><span class="punc">]</span> <span class="punc">=</span> <span class="fn">useState</span><span class="punc">(</span><span class="kw">false</span><span class="punc">);</span>
+
+  <span class="cmt">// 4. Called when user clicks "Ask"</span>
+  <span class="kw">const</span> <span class="fn">handleAsk</span> <span class="punc">=</span> <span class="kw">async</span> <span class="punc">() => {</span>
+    <span class="kw">if</span> <span class="punc">(!</span><span class="var">input</span><span class="punc">.</span><span class="fn">trim</span><span class="punc">())</span> <span class="kw">return</span><span class="punc">;</span>  <span class="cmt">// do nothing if empty</span>
+
+    <span class="fn">setLoading</span><span class="punc">(</span><span class="kw">true</span><span class="punc">);</span>
+    <span class="fn">setReply</span><span class="punc">(</span><span class="str">""</span><span class="punc">);</span>
+
+    <span class="kw">try</span> <span class="punc">{</span>
+      <span class="cmt">// 5. Call YOUR server — never call the Claude API directly from here</span>
+      <span class="kw">const</span> <span class="var">res</span> <span class="punc">=</span> <span class="kw">await</span> <span class="fn">fetch</span><span class="punc">(</span><span class="str">"/api/claude/chat"</span><span class="punc">, {</span>
+        <span class="var">method</span><span class="punc">:</span> <span class="str">"POST"</span><span class="punc">,</span>
+        <span class="var">headers</span><span class="punc">: {</span> <span class="str">"Content-Type"</span><span class="punc">:</span> <span class="str">"application/json"</span> <span class="punc">},</span>
+        <span class="var">body</span><span class="punc">:</span> <span class="typ">JSON</span><span class="punc">.</span><span class="fn">stringify</span><span class="punc">({</span> <span class="var">message</span><span class="punc">:</span> <span class="var">input</span> <span class="punc">})</span>
+      <span class="punc">});</span>
+
+      <span class="kw">const</span> <span class="var">data</span> <span class="punc">=</span> <span class="kw">await</span> <span class="var">res</span><span class="punc">.</span><span class="fn">json</span><span class="punc">();</span>
+      <span class="fn">setReply</span><span class="punc">(</span><span class="var">data</span><span class="punc">.</span><span class="var">reply</span><span class="punc">);</span>
+
+    <span class="punc">}</span> <span class="kw">catch</span> <span class="punc">(</span><span class="var">err</span><span class="punc">) {</span>
+      <span class="fn">setReply</span><span class="punc">(</span><span class="str">"Error: could not reach the server."</span><span class="punc">);</span>
+    <span class="punc">}</span> <span class="kw">finally</span> <span class="punc">{</span>
+      <span class="fn">setLoading</span><span class="punc">(</span><span class="kw">false</span><span class="punc">);</span>
+    <span class="punc">}</span>
+  <span class="punc">};</span>
+
+  <span class="kw">return</span> <span class="punc">(</span>
+    <span class="jsx">&lt;div</span> <span class="var">style</span><span class="punc">={{</span> <span class="var">maxWidth</span><span class="punc">:</span> <span class="num">600</span><span class="punc">,</span> <span class="var">margin</span><span class="punc">:</span> <span class="str">"40px auto"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"0 20px"</span> <span class="punc">}}</span><span class="jsx">&gt;</span>
+      <span class="jsx">&lt;h2&gt;</span>Ask Claude<span class="jsx">&lt;/h2&gt;</span>
+
+      <span class="cmt">{/* Input area */}</span>
+      <span class="jsx">&lt;textarea</span>
+        <span class="var">rows</span><span class="punc">={</span><span class="num">4</span><span class="punc">}</span>
+        <span class="var">value</span><span class="punc">={</span><span class="var">input</span><span class="punc">}</span>
+        <span class="var">onChange</span><span class="punc">={(</span><span class="var">e</span><span class="punc">) =></span> <span class="fn">setInput</span><span class="punc">(</span><span class="var">e</span><span class="punc">.</span><span class="var">target</span><span class="punc">.</span><span class="var">value</span><span class="punc">)}</span>
+        <span class="var">placeholder</span><span class="punc">=</span><span class="str">"Type your question..."</span>
+        <span class="var">style</span><span class="punc">={{</span> <span class="var">width</span><span class="punc">:</span> <span class="str">"100%"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"10px"</span> <span class="punc">}}</span>
+      <span class="jsx">/&gt;</span>
+
+      <span class="cmt">{/* Submit button */}</span>
+      <span class="jsx">&lt;button</span>
+        <span class="var">onClick</span><span class="punc">={</span><span class="fn">handleAsk</span><span class="punc">}</span>
+        <span class="var">disabled</span><span class="punc">={</span><span class="var">loading</span><span class="punc">}</span>
+        <span class="var">style</span><span class="punc">={{</span> <span class="var">marginTop</span><span class="punc">:</span> <span class="str">"10px"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"8px 20px"</span> <span class="punc">}}</span>
+      <span class="jsx">&gt;</span>
+        <span class="punc">{</span><span class="var">loading</span> <span class="punc">?</span> <span class="str">"Thinking..."</span> <span class="punc">:</span> <span class="str">"Ask Claude"</span><span class="punc">}</span>
+      <span class="jsx">&lt;/button&gt;</span>
+
+      <span class="cmt">{/* Reply area — only shown when there's a reply */}</span>
+      <span class="punc">{</span><span class="var">reply</span> <span class="punc">&amp;&amp;</span> <span class="punc">(</span>
+        <span class="jsx">&lt;div</span> <span class="var">style</span><span class="punc">={{</span> <span class="var">marginTop</span><span class="punc">:</span> <span class="str">"20px"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"16px"</span><span class="punc">,</span> <span class="var">background</span><span class="punc">:</span> <span class="str">"#f5f5f5"</span> <span class="punc">}}</span><span class="jsx">&gt;</span>
+          <span class="jsx">&lt;strong&gt;</span>Claude:<span class="jsx">&lt;/strong&gt;</span>
+          <span class="jsx">&lt;p&gt;{</span><span class="var">reply</span><span class="punc">}</span><span class="jsx">&lt;/p&gt;</span>
+        <span class="jsx">&lt;/div&gt;</span>
+      <span class="punc">)}</span>
+    <span class="jsx">&lt;/div&gt;</span>
+  <span class="punc">);</span>
+<span class="punc">}</span></code></pre>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 4.2 — Use it in your app</div>
+      <h3>Add the component to <span class="ic">App.jsx</span></h3>
+      <div class="code-wrap">
+        <span class="lang-tag">JSX — App.jsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="kw">import</span> ClaudeChat <span class="kw">from</span> <span class="str">"./components/ClaudeChat"</span><span class="punc">;</span>
+
+<span class="kw">export default function</span> <span class="fn">App</span><span class="punc">() {</span>
+  <span class="kw">return</span> <span class="punc">(</span>
+    <span class="jsx">&lt;div&gt;</span>
+      <span class="jsx">&lt;h1&gt;</span>My AI App<span class="jsx">&lt;/h1&gt;</span>
+      <span class="jsx">&lt;ClaudeChat /&gt;</span>
+    <span class="jsx">&lt;/div&gt;</span>
+  <span class="punc">);</span>
+<span class="punc">}</span></code></pre>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 4.3 — Common mistakes</div>
+      <h3>Watch out for these beginner pitfalls</h3>
+      <ul class="checklist">
+        <li>
+          <span class="chk">!</span>
+          <div><strong>Calling the Claude API directly from React</strong> — this exposes your key in the browser. Always go through your server.</div>
+        </li>
+        <li>
+          <span class="chk">!</span>
+          <div><strong>Forgetting to await fetch()</strong> — you'll get a Promise object instead of the data.</div>
+        </li>
+        <li>
+          <span class="chk">!</span>
+          <div><strong>Not setting Content-Type header</strong> — the server can't parse the request body without it.</div>
+        </li>
+        <li>
+          <span class="chk">!</span>
+          <div><strong>Using setState inside a stale closure</strong> — if you use <span class="ic">reply</span> inside an async callback, use <span class="ic">setReply(prev => ...)</span> for safety.</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ══════════════════════════════════════════
+       SECTION 5 — STREAMING
+  ══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num-big">5</div>
+      <div>
+        <h2>Stream AI Responses in Real Time</h2>
+        <p>Show each word as it arrives — no waiting for the full response</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Concept</div>
+      <h3>What is streaming and why use it?</h3>
+      <p>Without streaming: you wait ~3–10 seconds and then the whole response pops in at once. <strong>With streaming:</strong> you see each word typed out as Claude "thinks" it — just like ChatGPT. This massively improves perceived performance and feels much more alive.</p>
+      <div class="callout info">
+        <span class="icon">💡</span>
+        <div>Streaming uses <strong>Server-Sent Events (SSE)</strong> — a simple HTTP protocol where the server pushes small chunks of data one at a time. Your browser reads them as they arrive.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 5.1 — Streaming server route</div>
+      <h3>Add a streaming endpoint to your server</h3>
+      <div class="code-wrap">
+        <span class="lang-tag">JavaScript — server/routes/claude.js  (add this route)</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="cmt">// POST /api/claude/stream</span>
+<span class="var">router</span><span class="punc">.</span><span class="fn">post</span><span class="punc">(</span><span class="str">"/stream"</span><span class="punc">,</span> <span class="kw">async</span> <span class="punc">(</span><span class="var">req</span><span class="punc">,</span> <span class="var">res</span><span class="punc">) =></span> <span class="punc">{</span>
+  <span class="kw">const</span> <span class="punc">{</span> <span class="var">message</span> <span class="punc">}</span> <span class="punc">=</span> <span class="var">req</span><span class="punc">.</span><span class="var">body</span><span class="punc">;</span>
+
+  <span class="cmt">// 1. Tell the browser this is a streaming SSE response</span>
+  <span class="var">res</span><span class="punc">.</span><span class="fn">setHeader</span><span class="punc">(</span><span class="str">"Content-Type"</span><span class="punc">,</span> <span class="str">"text/event-stream"</span><span class="punc">);</span>
+  <span class="var">res</span><span class="punc">.</span><span class="fn">setHeader</span><span class="punc">(</span><span class="str">"Cache-Control"</span><span class="punc">,</span> <span class="str">"no-cache"</span><span class="punc">);</span>
+  <span class="var">res</span><span class="punc">.</span><span class="fn">setHeader</span><span class="punc">(</span><span class="str">"Connection"</span><span class="punc">,</span> <span class="str">"keep-alive"</span><span class="punc">);</span>
+
+  <span class="kw">try</span> <span class="punc">{</span>
+    <span class="cmt">// 2. Use client.messages.stream() instead of .create()</span>
+    <span class="kw">const</span> <span class="var">stream</span> <span class="punc">=</span> <span class="var">client</span><span class="punc">.</span><span class="fn">messages</span><span class="punc">.</span><span class="fn">stream</span><span class="punc">({</span>
+      <span class="var">model</span><span class="punc">:</span> <span class="str">"claude-sonnet-4-6"</span><span class="punc">,</span>
+      <span class="var">max_tokens</span><span class="punc">:</span> <span class="num">1024</span><span class="punc">,</span>
+      <span class="var">messages</span><span class="punc">: [{ </span><span class="var">role</span><span class="punc">:</span> <span class="str">"user"</span><span class="punc">,</span> <span class="var">content</span><span class="punc">:</span> <span class="var">message</span> <span class="punc">}]</span>
+    <span class="punc">});</span>
+
+    <span class="cmt">// 3. For each text chunk, send it to the browser</span>
+    <span class="var">stream</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"text"</span><span class="punc">,</span> <span class="punc">(</span><span class="var">textDelta</span><span class="punc">) =></span> <span class="punc">{</span>
+      <span class="cmt">// SSE format: "data: ...\n\n"</span>
+      <span class="var">res</span><span class="punc">.</span><span class="fn">write</span><span class="punc">(</span><span class="str">`data: </span><span class="punc">${</span><span class="typ">JSON</span><span class="punc">.</span><span class="fn">stringify</span><span class="punc">({</span> <span class="var">chunk</span><span class="punc">:</span> <span class="var">textDelta</span> <span class="punc">})}</span><span class="str">\n\n`</span><span class="punc">);</span>
+    <span class="punc">});</span>
+
+    <span class="cmt">// 4. When done, send a "done" signal and close the stream</span>
+    <span class="kw">await</span> <span class="var">stream</span><span class="punc">.</span><span class="fn">finalMessage</span><span class="punc">();</span>
+    <span class="var">res</span><span class="punc">.</span><span class="fn">write</span><span class="punc">(</span><span class="str">"data: [DONE]\n\n"</span><span class="punc">);</span>
+    <span class="var">res</span><span class="punc">.</span><span class="fn">end</span><span class="punc">();</span>
+
+  <span class="punc">}</span> <span class="kw">catch</span> <span class="punc">(</span><span class="var">err</span><span class="punc">) {</span>
+    <span class="var">res</span><span class="punc">.</span><span class="fn">write</span><span class="punc">(</span><span class="str">`data: </span><span class="punc">${</span><span class="typ">JSON</span><span class="punc">.</span><span class="fn">stringify</span><span class="punc">({</span> <span class="var">error</span><span class="punc">:</span> <span class="var">err</span><span class="punc">.</span><span class="var">message</span> <span class="punc">})}</span><span class="str">\n\n`</span><span class="punc">);</span>
+    <span class="var">res</span><span class="punc">.</span><span class="fn">end</span><span class="punc">();</span>
+  <span class="punc">}</span>
+<span class="punc">});</span></code></pre>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Step 5.2 — Streaming React component</div>
+      <h3>Update your component to read the stream</h3>
+      <div class="code-wrap">
+        <span class="lang-tag">JSX — ClaudeChatStreaming.jsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="kw">import</span> <span class="punc">{</span> <span class="var">useState</span> <span class="punc">}</span> <span class="kw">from</span> <span class="str">"react"</span><span class="punc">;</span>
+
+<span class="kw">export default function</span> <span class="fn">ClaudeChatStreaming</span><span class="punc">() {</span>
+  <span class="kw">const</span> <span class="punc">[</span><span class="var">input</span><span class="punc">,</span> <span class="var">setInput</span><span class="punc">]</span> <span class="punc">=</span> <span class="fn">useState</span><span class="punc">(</span><span class="str">""</span><span class="punc">);</span>
+  <span class="kw">const</span> <span class="punc">[</span><span class="var">reply</span><span class="punc">,</span> <span class="var">setReply</span><span class="punc">]</span> <span class="punc">=</span> <span class="fn">useState</span><span class="punc">(</span><span class="str">""</span><span class="punc">);</span>
+  <span class="kw">const</span> <span class="punc">[</span><span class="var">streaming</span><span class="punc">,</span> <span class="var">setStreaming</span><span class="punc">]</span> <span class="punc">=</span> <span class="fn">useState</span><span class="punc">(</span><span class="kw">false</span><span class="punc">);</span>
+
+  <span class="kw">const</span> <span class="fn">handleAsk</span> <span class="punc">=</span> <span class="kw">async</span> <span class="punc">() => {</span>
+    <span class="kw">if</span> <span class="punc">(!</span><span class="var">input</span><span class="punc">.</span><span class="fn">trim</span><span class="punc">())</span> <span class="kw">return</span><span class="punc">;</span>
+
+    <span class="fn">setStreaming</span><span class="punc">(</span><span class="kw">true</span><span class="punc">);</span>
+    <span class="fn">setReply</span><span class="punc">(</span><span class="str">""</span><span class="punc">);</span>  <span class="cmt">// clear previous reply</span>
+
+    <span class="kw">try</span> <span class="punc">{</span>
+      <span class="cmt">// 1. Call the streaming endpoint</span>
+      <span class="kw">const</span> <span class="var">response</span> <span class="punc">=</span> <span class="kw">await</span> <span class="fn">fetch</span><span class="punc">(</span><span class="str">"/api/claude/stream"</span><span class="punc">, {</span>
+        <span class="var">method</span><span class="punc">:</span> <span class="str">"POST"</span><span class="punc">,</span>
+        <span class="var">headers</span><span class="punc">: {</span> <span class="str">"Content-Type"</span><span class="punc">:</span> <span class="str">"application/json"</span> <span class="punc">},</span>
+        <span class="var">body</span><span class="punc">:</span> <span class="typ">JSON</span><span class="punc">.</span><span class="fn">stringify</span><span class="punc">({</span> <span class="var">message</span><span class="punc">:</span> <span class="var">input</span> <span class="punc">})</span>
+      <span class="punc">});</span>
+
+      <span class="cmt">// 2. Get a reader to read the body as it arrives</span>
+      <span class="kw">const</span> <span class="var">reader</span> <span class="punc">=</span> <span class="var">response</span><span class="punc">.</span><span class="var">body</span><span class="punc">.</span><span class="fn">getReader</span><span class="punc">();</span>
+      <span class="kw">const</span> <span class="var">decoder</span> <span class="punc">=</span> <span class="kw">new</span> <span class="typ">TextDecoder</span><span class="punc">();</span>
+
+      <span class="cmt">// 3. Loop — keep reading until "done"</span>
+      <span class="kw">while</span> <span class="punc">(</span><span class="kw">true</span><span class="punc">) {</span>
+        <span class="kw">const</span> <span class="punc">{</span> <span class="var">done</span><span class="punc">,</span> <span class="var">value</span> <span class="punc">}</span> <span class="punc">=</span> <span class="kw">await</span> <span class="var">reader</span><span class="punc">.</span><span class="fn">read</span><span class="punc">();</span>
+        <span class="kw">if</span> <span class="punc">(</span><span class="var">done</span><span class="punc">)</span> <span class="kw">break</span><span class="punc">;</span>
+
+        <span class="cmt">// 4. Decode the chunk and parse each SSE line</span>
+        <span class="kw">const</span> <span class="var">text</span> <span class="punc">=</span> <span class="var">decoder</span><span class="punc">.</span><span class="fn">decode</span><span class="punc">(</span><span class="var">value</span><span class="punc">);</span>
+        <span class="kw">const</span> <span class="var">lines</span> <span class="punc">=</span> <span class="var">text</span><span class="punc">.</span><span class="fn">split</span><span class="punc">(</span><span class="str">"\n"</span><span class="punc">);</span>
+
+        <span class="kw">for</span> <span class="punc">(</span><span class="kw">const</span> <span class="var">line</span> <span class="kw">of</span> <span class="var">lines</span><span class="punc">) {</span>
+          <span class="kw">if</span> <span class="punc">(!</span><span class="var">line</span><span class="punc">.</span><span class="fn">startsWith</span><span class="punc">(</span><span class="str">"data: "</span><span class="punc">))</span> <span class="kw">continue</span><span class="punc">;</span>
+
+          <span class="kw">const</span> <span class="var">payload</span> <span class="punc">=</span> <span class="var">line</span><span class="punc">.</span><span class="fn">slice</span><span class="punc">(</span><span class="num">6</span><span class="punc">);</span>  <span class="cmt">// strip "data: " prefix</span>
+          <span class="kw">if</span> <span class="punc">(</span><span class="var">payload</span> <span class="punc">===</span> <span class="str">"[DONE]"</span><span class="punc">)</span> <span class="kw">break</span><span class="punc">;</span>
+
+          <span class="kw">const</span> <span class="punc">{</span> <span class="var">chunk</span> <span class="punc">}</span> <span class="punc">=</span> <span class="typ">JSON</span><span class="punc">.</span><span class="fn">parse</span><span class="punc">(</span><span class="var">payload</span><span class="punc">);</span>
+
+          <span class="cmt">// 5. Append each chunk to the reply — prev => ensures no stale state</span>
+          <span class="fn">setReply</span><span class="punc">(</span><span class="var">prev</span> <span class="punc">=></span> <span class="var">prev</span> <span class="punc">+</span> <span class="var">chunk</span><span class="punc">);</span>
+        <span class="punc">}</span>
+      <span class="punc">}</span>
+
+    <span class="punc">}</span> <span class="kw">catch</span> <span class="punc">(</span><span class="var">err</span><span class="punc">) {</span>
+      <span class="fn">setReply</span><span class="punc">(</span><span class="str">"Error connecting to server."</span><span class="punc">);</span>
+    <span class="punc">}</span> <span class="kw">finally</span> <span class="punc">{</span>
+      <span class="fn">setStreaming</span><span class="punc">(</span><span class="kw">false</span><span class="punc">);</span>
+    <span class="punc">}</span>
+  <span class="punc">};</span>
+
+  <span class="kw">return</span> <span class="punc">(</span>
+    <span class="jsx">&lt;div</span> <span class="var">style</span><span class="punc">={{</span> <span class="var">maxWidth</span><span class="punc">:</span> <span class="num">600</span><span class="punc">,</span> <span class="var">margin</span><span class="punc">:</span> <span class="str">"40px auto"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"0 20px"</span> <span class="punc">}}</span><span class="jsx">&gt;</span>
+      <span class="jsx">&lt;h2&gt;</span>Ask Claude (Streaming)<span class="jsx">&lt;/h2&gt;</span>
+
+      <span class="jsx">&lt;textarea</span>
+        <span class="var">rows</span><span class="punc">={</span><span class="num">4</span><span class="punc">}</span>
+        <span class="var">value</span><span class="punc">={</span><span class="var">input</span><span class="punc">}</span>
+        <span class="var">onChange</span><span class="punc">={(</span><span class="var">e</span><span class="punc">) =></span> <span class="fn">setInput</span><span class="punc">(</span><span class="var">e</span><span class="punc">.</span><span class="var">target</span><span class="punc">.</span><span class="var">value</span><span class="punc">)}</span>
+        <span class="var">placeholder</span><span class="punc">=</span><span class="str">"Ask anything..."</span>
+        <span class="var">style</span><span class="punc">={{</span> <span class="var">width</span><span class="punc">:</span> <span class="str">"100%"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"10px"</span> <span class="punc">}}</span>
+      <span class="jsx">/&gt;</span>
+
+      <span class="jsx">&lt;button</span>
+        <span class="var">onClick</span><span class="punc">={</span><span class="fn">handleAsk</span><span class="punc">}</span>
+        <span class="var">disabled</span><span class="punc">={</span><span class="var">streaming</span><span class="punc">}</span>
+        <span class="var">style</span><span class="punc">={{</span> <span class="var">marginTop</span><span class="punc">:</span> <span class="str">"10px"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"8px 20px"</span> <span class="punc">}}</span>
+      <span class="jsx">&gt;</span>
+        <span class="punc">{</span><span class="var">streaming</span> <span class="punc">?</span> <span class="str">"Streaming..."</span> <span class="punc">:</span> <span class="str">"Ask Claude"</span><span class="punc">}</span>
+      <span class="jsx">&lt;/button&gt;</span>
+
+      <span class="punc">{</span><span class="var">reply</span> <span class="punc">&amp;&amp;</span> <span class="punc">(</span>
+        <span class="jsx">&lt;div</span> <span class="var">style</span><span class="punc">={{</span>
+          <span class="var">marginTop</span><span class="punc">:</span> <span class="str">"20px"</span><span class="punc">,</span> <span class="var">padding</span><span class="punc">:</span> <span class="str">"16px"</span><span class="punc">,</span>
+          <span class="var">background</span><span class="punc">:</span> <span class="str">"#f5f5f5"</span><span class="punc">,</span> <span class="var">whiteSpace</span><span class="punc">:</span> <span class="str">"pre-wrap"</span>
+        <span class="punc">}}</span><span class="jsx">&gt;</span>
+          <span class="jsx">&lt;strong&gt;</span>Claude:<span class="jsx">&lt;/strong&gt;</span>
+          <span class="jsx">&lt;p&gt;{</span><span class="var">reply</span><span class="punc">}</span><span class="jsx">&lt;/p&gt;</span>
+          <span class="cmt">{/* Blinking cursor while streaming */}</span>
+          <span class="punc">{</span><span class="var">streaming</span> <span class="punc">&amp;&amp;</span> <span class="jsx">&lt;span</span> <span class="var">style</span><span class="punc">={{</span> <span class="var">animation</span><span class="punc">:</span> <span class="str">"blink 1s infinite"</span> <span class="punc">}}</span><span class="jsx">&gt;</span>▌<span class="jsx">&lt;/span&gt;}</span>
+        <span class="jsx">&lt;/div&gt;</span>
+      <span class="punc">)}</span>
+    <span class="jsx">&lt;/div&gt;</span>
+  <span class="punc">);</span>
+<span class="punc">}</span></code></pre>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-tag">Recap</div>
+      <h3>Streaming vs. Non-streaming — at a glance</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;">
+        <thead>
+          <tr style="border-bottom:1px solid #2a2a2a;">
+            <th style="text-align:left;padding:8px 10px;color:#888;font-weight:600;"></th>
+            <th style="text-align:left;padding:8px 10px;color:#888;font-weight:600;">Non-Streaming</th>
+            <th style="text-align:left;padding:8px 10px;color:#888;font-weight:600;">Streaming</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #1e1e1e;">
+            <td style="padding:9px 10px;color:#aaa;font-weight:600;">SDK method</td>
+            <td style="padding:9px 10px;font-family:monospace;color:#c3e88d;">.messages.create()</td>
+            <td style="padding:9px 10px;font-family:monospace;color:#c3e88d;">.messages.stream()</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e1e1e;background:#161616;">
+            <td style="padding:9px 10px;color:#aaa;font-weight:600;">Response</td>
+            <td style="padding:9px 10px;color:#aaa;">All at once after seconds</td>
+            <td style="padding:9px 10px;color:#aaa;">Word by word, immediately</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e1e1e;">
+            <td style="padding:9px 10px;color:#aaa;font-weight:600;">UX feel</td>
+            <td style="padding:9px 10px;color:#aaa;">Loading spinner → pop</td>
+            <td style="padding:9px 10px;color:#aaa;">Typing animation, alive</td>
+          </tr>
+          <tr style="background:#161616;">
+            <td style="padding:9px 10px;color:#aaa;font-weight:600;">Best for</td>
+            <td style="padding:9px 10px;color:#aaa;">Short answers, batch jobs</td>
+            <td style="padding:9px 10px;color:#aaa;">Chat UIs, long responses</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Final checklist -->
+    <div class="step-card" style="border-color:#166534;background:#0a1f0a;">
+      <div class="step-tag" style="background:#0d2b0d;border-color:#166534;color:#86efac;">All done!</div>
+      <h3 style="color:#86efac;">You've completed the guide</h3>
+      <p>Here's everything you built:</p>
+      <ul class="checklist" style="margin-top:10px;">
+        <li><span class="chk">✓</span> Understand what the Claude API is and how it works</li>
+        <li><span class="chk">✓</span> Set up your API key securely with environment variables</li>
+        <li><span class="chk">✓</span> Made your first Claude API request from Node.js</li>
+        <li><span class="chk">✓</span> Built a React component that calls Claude through your server</li>
+        <li><span class="chk">✓</span> Added real-time streaming so responses appear word by word</li>
+      </ul>
+      <div class="callout info" style="margin-top:16px;">
+        <span class="icon">🚀</span>
+        <div><strong>Next steps:</strong> Try adding a conversation history (multi-turn chat), a system prompt to give Claude a persona, or tool use to let Claude call your own functions!</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p>Anthropic Claude API Intern Guide &nbsp;·&nbsp; Built for the Search UI team</p>
+  <p style="margin-top:8px;">
+    <a href="https://docs.anthropic.com" target="_blank">docs.anthropic.com</a>
+    &nbsp;·&nbsp;
+    <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+  </p>
+</footer>
+
+<style>
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.parentElement.querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
