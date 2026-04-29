@@ -1,0 +1,29 @@
+{
+  // Cloudflare Pages configuration
+  // Docs: https://developers.cloudflare.com/pages/
+
+  "name": "claude-ai-demo",
+  "compatibility_date": "2024-01-01",
+
+  // Pages-specific config: tells Cloudflare where your built React app lives
+  "pages_build_output_dir": "dist",
+
+  // Workers AI binding — free AI models
+  "ai": {
+    "binding": "AI"
+  },
+
+  // R2 bucket — Cloudflare's object storage (like AWS S3 but free tier available)
+  // Stores uploaded CV files
+  "r2_buckets": [
+    {
+      "binding": "CV_BUCKET",       // how you access it in code: env.CV_BUCKET
+      "bucket_name": "cv-storage",  // the actual bucket name in Cloudflare
+      "preview_bucket_name": "cv-storage-preview" // used during local dev
+    }
+  ],
+
+  "vars": {
+    "APP_NAME": "Claude AI Demo"
+  }
+}
