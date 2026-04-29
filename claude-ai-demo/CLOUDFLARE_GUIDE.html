@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloudflare AI Demo — Intern Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #f38020 0%, #faad14 100%);
+      color: white;
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    .header p  { font-size: 1.1rem; opacity: 0.9; }
+
+    /* ── Layout ── */
+    .container { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
+
+    /* ── Section ── */
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .step-badge {
+      background: #f38020;
+      color: white;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .section-title h2 { font-size: 1.3rem; color: #1a1a1a; }
+
+    /* ── Concept box ── */
+    .concept {
+      background: #fff7e6;
+      border-left: 4px solid #f38020;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .concept strong { color: #d46b08; }
+
+    /* ── Info / tip box ── */
+    .tip {
+      background: #e6f4ff;
+      border-left: 4px solid #1677ff;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+    }
+    .tip strong { color: #0958d9; }
+
+    .warning {
+      background: #fff2f0;
+      border-left: 4px solid #ff4d4f;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+    }
+    .warning strong { color: #cf1322; }
+
+    .success {
+      background: #f6ffed;
+      border-left: 4px solid #52c41a;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+    }
+    .success strong { color: #389e0d; }
+
+    /* ── Code blocks ── */
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 12px 0;
+      font-family: 'Fira Code', 'Courier New', monospace;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.88rem;
+      color: #c41d7f;
+    }
+
+    /* ── Steps list ── */
+    .steps { list-style: none; padding: 0; }
+    .steps li {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.97rem;
+    }
+    .steps li:last-child { border-bottom: none; }
+    .check { color: #52c41a; font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── Architecture diagram ── */
+    .arch {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      line-height: 1.8;
+      margin: 12px 0;
+    }
+    .arch .orange { color: #fab387; }
+    .arch .blue   { color: #89b4fa; }
+    .arch .green  { color: #a6e3a1; }
+    .arch .yellow { color: #f9e2af; }
+
+    /* ── File tree ── */
+    .file-tree {
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      line-height: 1.9;
+    }
+    .file-tree .folder { color: #1677ff; font-weight: 600; }
+    .file-tree .file   { color: #434343; }
+    .file-tree .comment{ color: #8c8c8c; font-style: italic; }
+
+    /* ── Prompt example ── */
+    .prompt-box {
+      background: #f9f0ff;
+      border: 1px solid #d3adf7;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+    .prompt-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .prompt-label.system { color: #722ed1; }
+    .prompt-label.user   { color: #1677ff; }
+    .prompt-label.ai     { color: #389e0d; }
+
+    /* ── Tag ── */
+    .tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin: 2px;
+    }
+    .tag-orange { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+    .tag-blue   { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+    .tag-green  { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+    .tag-purple { background: #f9f0ff; color: #531dab; border: 1px solid #d3adf7; }
+
+    /* ── Two column ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    .mini-card {
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .mini-card h4 { margin-bottom: 8px; font-size: 0.95rem; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92rem; }
+    th { background: #f5f5f5; padding: 10px 12px; text-align: left; border: 1px solid #e8e8e8; }
+    td { padding: 10px 12px; border: 1px solid #e8e8e8; }
+    tr:hover td { background: #fafafa; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 32px;
+      color: #8c8c8c;
+      font-size: 0.9rem;
+    }
+    .footer a { color: #f38020; text-decoration: none; }
+
+    h3 { margin: 16px 0 8px; font-size: 1.05rem; color: #262626; }
+    p  { margin-bottom: 10px; font-size: 0.97rem; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════ HEADER -->
+<div class="header">
+  <h1>☁️ Cloudflare AI Demo</h1>
+  <p>Step-by-step guide for interns — Build & Deploy an AI app using Cloudflare Pages, Workers AI and R2</p>
+</div>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════ WHAT WE'RE BUILDING -->
+  <div class="section">
+    <div class="section-title">
+      <div style="font-size:1.6rem">🗺️</div>
+      <h2>What We're Building</h2>
+    </div>
+
+    <p>A web app with two AI-powered features, fully deployed on Cloudflare's free tier:</p>
+
+    <div class="two-col">
+      <div class="mini-card">
+        <h4>📄 CV Upload & Q&A</h4>
+        <p>Upload a PDF CV → stored in <strong>Cloudflare R2</strong> → ask the AI anything about it</p>
+        <span class="tag tag-orange">R2 Storage</span>
+        <span class="tag tag-blue">Workers AI</span>
+      </div>
+      <div class="mini-card">
+        <h4>✍️ Job Description Generator</h4>
+        <p>Fill a form → AI generates a polished structured JD using <strong>Llama 3.1</strong></p>
+        <span class="tag tag-purple">Prompt Engineering</span>
+        <span class="tag tag-green">JSON Output</span>
+      </div>
+    </div>
+
+    <h3>Architecture</h3>
+    <div class="arch">
+<span class="orange">Browser (React + Vite)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp; POST /api/upload-cv &nbsp;&nbsp;&nbsp;← upload CV file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp; POST /api/ask-cv &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← ask a question<br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp; POST /api/generate-jd &nbsp;← generate job description<br>
+&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+<span class="blue">Cloudflare Pages Functions</span> <span class="yellow">(functions/api/*.js)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="green">env.CV_BUCKET</span> → Cloudflare R2 (stores CV files)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="green">env.AI.run()</span> &nbsp;&nbsp;→ Cloudflare Workers AI (Llama 3.1, FREE)
+    </div>
+
+    <div class="tip">
+      <strong>💡 Why Cloudflare?</strong> Everything used in this project is on Cloudflare's <strong>free tier</strong> — Workers AI, R2 storage (10GB free), and Pages hosting. No credit card surprises.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ KEY CONCEPTS -->
+  <div class="section">
+    <div class="section-title">
+      <div style="font-size:1.6rem">🧠</div>
+      <h2>Key Concepts Before You Start</h2>
+    </div>
+
+    <div class="concept">
+      <strong>Cloudflare Pages</strong> — hosts your React frontend (like Netlify/Vercel). Put JS files in the <code>functions/</code> folder and they become serverless API endpoints automatically.
+    </div>
+
+    <div class="concept">
+      <strong>Cloudflare Workers AI</strong> — run AI models (Llama, Mistral etc.) on Cloudflare's servers for free. No API key needed — just <code>env.AI.run("model-name", {...})</code>.
+    </div>
+
+    <div class="concept">
+      <strong>Cloudflare R2</strong> — object storage (like AWS S3 but free for 10GB). Store and retrieve files from your Workers using <code>env.BUCKET_NAME.put()</code> and <code>.get()</code>.
+    </div>
+
+    <div class="concept">
+      <strong>Bindings</strong> — how your Worker code accesses Cloudflare services. Configured in <code>wrangler.jsonc</code> for local dev and in the <strong>Cloudflare Dashboard</strong> for production.
+    </div>
+
+    <h3>Prompt Engineering Basics</h3>
+    <p>Every AI API call has two parts:</p>
+
+    <div class="prompt-box">
+      <div class="prompt-label system">🟣 System Prompt — tells the AI WHO it is and WHAT FORMAT to use</div>
+      <pre style="margin:0">You are an expert HR assistant.
+Always respond with valid JSON only — no extra text.
+Use this structure: { "name": "...", "skills": [...] }</pre>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-label user">🔵 User Message — context injection (real data from the user)</div>
+      <pre style="margin:0">Please summarise the following CV:
+
+Jane Smith, Senior Engineer at TechCorp...
+[CV text injected here dynamically]</pre>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-label ai">🟢 AI Response — structured JSON we parse in React</div>
+      <pre style="margin:0">{ "name": "Jane Smith", "title": "Senior Engineer", "skills": ["React", "Node.js"] }</pre>
+    </div>
+
+    <table>
+      <tr><th>Concept</th><th>What it means</th><th>Where in code</th></tr>
+      <tr><td>System prompt</td><td>AI's role + output format</td><td><code>functions/api/*.js</code></td></tr>
+      <tr><td>Context injection</td><td>Inject user data into the prompt</td><td><code>userMessage = `...${cvText}`</code></td></tr>
+      <tr><td>Structured output</td><td>Ask AI to reply in JSON</td><td><code>JSON.parse(aiResponse.response)</code></td></tr>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════════ FILE STRUCTURE -->
+  <div class="section">
+    <div class="section-title">
+      <div style="font-size:1.6rem">📁</div>
+      <h2>Project File Structure</h2>
+    </div>
+
+    <div class="file-tree">
+<span class="folder">claude-ai-demo/</span><br>
+├── <span class="folder">functions/</span> <span class="comment">← Cloudflare serverless API (backend)</span><br>
+│&nbsp;&nbsp; └── <span class="folder">api/</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├── <span class="file">upload-cv.js</span> &nbsp;&nbsp;<span class="comment">← stores CV file in R2</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├── <span class="file">ask-cv.js</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← reads from R2, asks AI</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └── <span class="file">generate-jd.js</span> <span class="comment">← generates job description</span><br>
+├── <span class="folder">src/</span> <span class="comment">← React frontend</span><br>
+│&nbsp;&nbsp; ├── <span class="folder">pages/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">CVSummariser.jsx</span> <span class="comment">← upload + Q&A UI</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">JDGenerator.jsx</span> &nbsp;<span class="comment">← form + JD output UI</span><br>
+│&nbsp;&nbsp; └── <span class="folder">components/</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └── <span class="file">PromptDebugger.jsx</span> <span class="comment">← shows prompts sent to AI</span><br>
+├── <span class="file">wrangler.jsonc</span> &nbsp;&nbsp;&nbsp;<span class="comment">← Cloudflare config (AI + R2 bindings)</span><br>
+├── <span class="file">vite.config.js</span> &nbsp;&nbsp;&nbsp;<span class="comment">← Vite config + /api proxy for local dev</span><br>
+└── <span class="file">package.json</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 1 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">1</div>
+      <h2>Set Up Your Cloudflare Account</h2>
+    </div>
+
+    <ul class="steps">
+      <li><span class="check">✅</span> Go to <strong>cloudflare.com</strong> and create a free account</li>
+      <li><span class="check">✅</span> Verify your email address</li>
+      <li><span class="check">✅</span> No credit card required for this project</li>
+    </ul>
+
+    <div class="tip">
+      <strong>💡 Free tier includes:</strong> Pages hosting, 100k Workers AI requests/day, 10GB R2 storage — all free.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 2 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">2</div>
+      <h2>Install Dependencies & Login</h2>
+    </div>
+
+    <p>Open a terminal inside the project folder:</p>
+
+    <pre>cd claude-ai-demo
+npm install</pre>
+
+    <p>Login to Cloudflare (opens a browser window):</p>
+
+    <pre>npx wrangler login</pre>
+
+    <ul class="steps">
+      <li><span class="check">✅</span> A browser window will open — click <strong>Allow</strong></li>
+      <li><span class="check">✅</span> You'll see <code>Successfully logged in</code> in the terminal</li>
+    </ul>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 3 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">3</div>
+      <h2>Create the R2 Bucket</h2>
+    </div>
+
+    <p>R2 is Cloudflare's file storage. Run this once to create the bucket:</p>
+
+    <pre>npx wrangler r2 bucket create cv-storage</pre>
+
+    <p>Verify it was created:</p>
+
+    <pre>npx wrangler r2 bucket list</pre>
+
+    <div class="success">
+      <strong>✅ Expected output:</strong> You should see <code>cv-storage</code> in the list.
+    </div>
+
+    <div class="tip">
+      <strong>💡 What is a bucket?</strong> Think of it like a folder in the cloud. You store files in it and retrieve them using a key (filename). The first 10GB per month is free.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 4 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">4</div>
+      <h2>Run Locally</h2>
+    </div>
+
+    <p>You need <strong>two terminals</strong> running at the same time:</p>
+
+    <h3>Terminal 1 — React frontend (Vite)</h3>
+    <pre>npm run dev</pre>
+
+    <h3>Terminal 2 — Cloudflare Worker (handles /api routes)</h3>
+    <pre>npx wrangler pages dev --proxy 5173</pre>
+
+    <p>Then open your browser at:</p>
+    <pre>http://localhost:8788</pre>
+
+    <div class="warning">
+      <strong>⚠️ Important:</strong> Use port <strong>8788</strong> (not 5173) when testing locally. Port 8788 is the Cloudflare Worker, which handles the <code>/api</code> routes. Port 5173 is Vite only and won't have the API.
+    </div>
+
+    <div class="tip">
+      <strong>💡 Local vs Deployed:</strong> When running locally, R2 files are stored in <code>.wrangler/state/</code> on your machine — not in the real Cloudflare R2 bucket. To see files in the dashboard, you must test on the deployed URL.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 5 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">5</div>
+      <h2>Deploy to Cloudflare Pages</h2>
+    </div>
+
+    <h3>Build the React app</h3>
+    <pre>npm run build</pre>
+
+    <h3>Deploy to Cloudflare</h3>
+    <pre>npx wrangler pages deploy dist</pre>
+
+    <div class="success">
+      <strong>✅ You'll get a live URL like:</strong><br>
+      <code>https://claude-ai-demo.pages.dev</code>
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ Every time you change code</strong>, run <code>npm run build</code> then <code>npx wrangler pages deploy dist</code> again to update the live site.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 6 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">6</div>
+      <h2>Add Bindings in Cloudflare Dashboard</h2>
+    </div>
+
+    <p>Bindings connect your deployed Workers to Cloudflare services. You must add them manually in the dashboard — <code>wrangler.jsonc</code> only works for local development.</p>
+
+    <h3>Go to:</h3>
+    <pre>dash.cloudflare.com → Workers & Pages → claude-ai-demo → Settings → Functions</pre>
+
+    <h3>Add Workers AI Binding</h3>
+    <ul class="steps">
+      <li><span class="check">➡️</span> Scroll to <strong>Workers AI Bindings</strong></li>
+      <li><span class="check">➡️</span> Click <strong>Add binding</strong></li>
+      <li><span class="check">➡️</span> Variable name: <code>AI</code></li>
+      <li><span class="check">➡️</span> Click Save</li>
+    </ul>
+
+    <h3>Add R2 Bucket Binding</h3>
+    <ul class="steps">
+      <li><span class="check">➡️</span> Scroll to <strong>R2 bucket bindings</strong></li>
+      <li><span class="check">➡️</span> Click <strong>Add binding</strong></li>
+      <li><span class="check">➡️</span> Variable name: <code>CV_BUCKET</code></li>
+      <li><span class="check">➡️</span> Bucket: select <code>cv-storage</code></li>
+      <li><span class="check">➡️</span> Click Save</li>
+    </ul>
+
+    <div class="tip">
+      <strong>💡 Why do we need this?</strong> In code we write <code>env.AI</code> and <code>env.CV_BUCKET</code>. The binding is what connects those names to the actual Cloudflare services in production.
+    </div>
+
+    <h3>Redeploy after adding bindings</h3>
+    <pre>npm run build
+npx wrangler pages deploy dist</pre>
+  </div>
+
+  <!-- ══════════════════════════════════════ STEP 7 -->
+  <div class="section">
+    <div class="section-title">
+      <div class="step-badge">7</div>
+      <h2>Test the Live App</h2>
+    </div>
+
+    <p>Open your deployed URL (e.g. <code>claude-ai-demo.pages.dev</code>) and test:</p>
+
+    <h3>CV Upload & Q&A</h3>
+    <ul class="steps">
+      <li><span class="check">1️⃣</span> Click <strong>CV Upload & Q&A</strong> in the nav</li>
+      <li><span class="check">2️⃣</span> Upload a PDF or TXT file</li>
+      <li><span class="check">3️⃣</span> Wait for "Uploaded successfully" message</li>
+      <li><span class="check">4️⃣</span> Type a question like <em>"What skills does this candidate have?"</em></li>
+      <li><span class="check">5️⃣</span> See the AI's answer based on the CV</li>
+      <li><span class="check">6️⃣</span> Check <strong>dash.cloudflare.com → R2 → cv-storage</strong> to see your file stored</li>
+    </ul>
+
+    <h3>Job Description Generator</h3>
+    <ul class="steps">
+      <li><span class="check">1️⃣</span> Click <strong>JD Generator</strong> in the nav</li>
+      <li><span class="check">2️⃣</span> Fill in Job Title, Department, Requirements</li>
+      <li><span class="check">3️⃣</span> Click <strong>Generate with AI</strong></li>
+      <li><span class="check">4️⃣</span> See the structured JD appear section by section</li>
+      <li><span class="check">5️⃣</span> Expand <strong>Prompt Debugger</strong> to see the exact system prompt + user message sent to AI</li>
+    </ul>
+  </div>
+
+  <!-- ══════════════════════════════════════ HOW THE CODE WORKS -->
+  <div class="section">
+    <div class="section-title">
+      <div style="font-size:1.6rem">🔍</div>
+      <h2>How the Code Works — Key Files Explained</h2>
+    </div>
+
+    <h3>functions/api/upload-cv.js</h3>
+    <pre><span style="color:#cba6f7">// 1. Read the uploaded file from the form
+</span>const file = formData.get("file");
+const extractedText = formData.get("text"); <span style="color:#6c7086">// extracted by PDF.js in browser</span>
+
+<span style="color:#cba6f7">// 2. Store in R2 — env.CV_BUCKET is the binding
+</span>await env.CV_BUCKET.put(key, file.stream());        <span style="color:#6c7086">// original file</span>
+await env.CV_BUCKET.put(`${key}.txt`, extractedText); <span style="color:#6c7086">// extracted text</span></pre>
+
+    <h3>functions/api/ask-cv.js</h3>
+    <pre><span style="color:#cba6f7">// 1. Read the CV text back from R2
+</span>const object = await env.CV_BUCKET.get(`${key}.txt`);
+const cvText = await object.text();
+
+<span style="color:#cba6f7">// 2. Inject CV text into the prompt (context injection)
+</span>const userMessage = `Here is the candidate's CV:\n${cvText}\n\nQuestion: ${question}`;
+
+<span style="color:#cba6f7">// 3. Call Cloudflare Workers AI — completely free!
+</span>const aiResponse = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+  messages: [
+    { role: "system", content: systemPrompt },
+    { role: "user",   content: userMessage  },
+  ]
+});</pre>
+
+    <h3>src/pages/CVSummariser.jsx (frontend)</h3>
+    <pre><span style="color:#cba6f7">// 1. Extract text from PDF in the browser (PDF.js)
+</span>const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+const pageText = content.items.map(item => item.str).join(' ');
+
+<span style="color:#cba6f7">// 2. Upload file + text to the Worker
+</span>const formData = new FormData();
+formData.append('file', file);
+formData.append('text', extractedText);
+await fetch('/api/upload-cv', { method: 'POST', body: formData });
+
+<span style="color:#cba6f7">// 3. Ask the AI a question
+</span>const res = await fetch('/api/ask-cv', {
+  method: 'POST',
+  body: JSON.stringify({ key, question })
+});</pre>
+  </div>
+
+  <!-- ══════════════════════════════════════ TROUBLESHOOTING -->
+  <div class="section">
+    <div class="section-title">
+      <div style="font-size:1.6rem">🛠️</div>
+      <h2>Troubleshooting</h2>
+    </div>
+
+    <table>
+      <tr>
+        <th>Problem</th>
+        <th>Cause</th>
+        <th>Fix</th>
+      </tr>
+      <tr>
+        <td>Network error on upload</td>
+        <td>Wrangler not running</td>
+        <td>Run <code>npx wrangler pages dev --proxy 5173</code> in Terminal 2</td>
+      </tr>
+      <tr>
+        <td>File uploaded but not in R2 dashboard</td>
+        <td>Testing on localhost</td>
+        <td>Test on the deployed URL — local files go to <code>.wrangler/state/</code></td>
+      </tr>
+      <tr>
+        <td>AI not responding on deployed site</td>
+        <td>Workers AI binding missing</td>
+        <td>Add <code>AI</code> binding in Dashboard → Settings → Functions</td>
+      </tr>
+      <tr>
+        <td>Upload fails on deployed site</td>
+        <td>R2 binding missing</td>
+        <td>Add <code>CV_BUCKET</code> → <code>cv-storage</code> binding in Dashboard</td>
+      </tr>
+      <tr>
+        <td>dist folder not found</td>
+        <td>Forgot to build</td>
+        <td>Run <code>npm run build</code> before deploying</td>
+      </tr>
+      <tr>
+        <td>Changes not showing on live site</td>
+        <td>Old deployment</td>
+        <td>Run <code>npm run build && npx wrangler pages deploy dist</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════════ QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-title">
+      <div style="font-size:1.6rem">⚡</div>
+      <h2>Quick Reference Commands</h2>
+    </div>
+
+    <table>
+      <tr><th>Command</th><th>What it does</th></tr>
+      <tr><td><code>npm install</code></td><td>Install all dependencies</td></tr>
+      <tr><td><code>npx wrangler login</code></td><td>Log in to Cloudflare</td></tr>
+      <tr><td><code>npm run dev</code></td><td>Start React (Terminal 1)</td></tr>
+      <tr><td><code>npx wrangler pages dev --proxy 5173</code></td><td>Start Cloudflare Worker locally (Terminal 2)</td></tr>
+      <tr><td><code>npm run build</code></td><td>Build React for production</td></tr>
+      <tr><td><code>npx wrangler pages deploy dist</code></td><td>Deploy to Cloudflare Pages</td></tr>
+      <tr><td><code>npx wrangler r2 bucket create cv-storage</code></td><td>Create the R2 bucket (once)</td></tr>
+      <tr><td><code>npx wrangler r2 object list cv-storage</code></td><td>List files in the bucket</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Built with ☁️ Cloudflare Pages · Workers AI · R2 &nbsp;|&nbsp;
+  <a href="https://developers.cloudflare.com/pages/">Cloudflare Pages Docs</a> &nbsp;|&nbsp;
+  <a href="https://developers.cloudflare.com/workers-ai/">Workers AI Docs</a> &nbsp;|&nbsp;
+  <a href="https://developers.cloudflare.com/r2/">R2 Docs</a>
+</div>
+
+</body>
+</html>
